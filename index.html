@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SchematicForge — Minecraft Build Manager</title>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --glass-bg: rgba(15, 20, 35, 0.72);
+    --glass-border: rgba(120, 180, 255, 0.18);
+    --glass-hover: rgba(30, 45, 70, 0.85);
+    --panel-bg: rgba(8, 14, 26, 0.80);
+    --accent-green: #4ade80;
+    --accent-blue: #60a5fa;
+    --accent-yellow: #fbbf24;
+    --accent-red: #f87171;
+    --accent-purple: #a78bfa;
+    --accent-orange: #fb923c;
+    --text-primary: #e8f0ff;
+    --text-muted: #8899bb;
+    --mc-dirt: #8B5E3C;
+    --mc-grass: #5B8A3C;
+    --mc-stone: #7A7A7A;
+    --mc-diamond: #4AE2D0;
+    --mc-gold: #FAB93A;
+    --mc-iron: #C8C8C8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: #0a0e1a;
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(30, 80, 160, 0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 80% 80%, rgba(15, 120, 80, 0.13) 0%, transparent 55%),
+      radial-gradient(ellipse 50% 40% at 60% 30%, rgba(100, 40, 180, 0.10) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Grid background pattern */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(60,100,200,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(60,100,200,0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #app { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; }
+
+  /* ── HEADER ── */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 28px;
+    background: rgba(8,14,26,0.85);
+    border-bottom: 1px solid var(--glass-border);
+    backdrop-filter: blur(16px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #4ade80, #22c55e);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    color: #0a1a0e;
+    box-shadow: 0 0 16px rgba(74,222,128,0.35);
+  }
+
+  .logo-text {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    color: var(--accent-green);
+    letter-spacing: 1px;
+    text-shadow: 0 0 20px rgba(74,222,128,0.5);
+  }
+
+  .logo-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 600;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* ── GLASS BUTTON ── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    background: rgba(30,50,90,0.45);
+    color: var(--text-primary);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    backdrop-filter: blur(8px);
+  }
+  .btn:hover { background: rgba(60,90,160,0.55); border-color: rgba(150,200,255,0.35); transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .btn-green { border-color: rgba(74,222,128,0.4); color: var(--accent-green); }
+  .btn-green:hover { background: rgba(74,222,128,0.15); }
+  .btn-blue { border-color: rgba(96,165,250,0.4); color: var(--accent-blue); }
+  .btn-blue:hover { background: rgba(96,165,250,0.15); }
+  .btn-sm { padding: 5px 11px; font-size: 12px; border-radius: 8px; }
+
+  /* ── MAIN LAYOUT ── */
+  .main { display: flex; gap: 20px; padding: 20px 28px; flex: 1; }
+
+  /* ── LEFT SIDEBAR ── */
+  .sidebar {
+    width: 280px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  /* ── GLASS PANEL ── */
+  .glass-panel {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    backdrop-filter: blur(20px);
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .panel-title {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+  }
+
+  .panel-body { padding: 16px 18px; }
+
+  /* ── UPLOAD ZONE ── */
+  .upload-zone {
+    border: 2px dashed rgba(96,165,250,0.35);
+    border-radius: 12px;
+    padding: 28px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s;
+    background: rgba(96,165,250,0.04);
+  }
+  .upload-zone:hover, .upload-zone.drag-over {
+    border-color: rgba(96,165,250,0.7);
+    background: rgba(96,165,250,0.10);
+  }
+  .upload-icon { font-size: 32px; margin-bottom: 10px; }
+  .upload-text { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+  .upload-text strong { color: var(--accent-blue); }
+
+  /* ── PROGRESS RING ── */
+  .progress-circle-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 0 6px;
+  }
+
+  .progress-ring-container { position: relative; width: 110px; height: 110px; }
+  .progress-ring-bg { fill: none; stroke: rgba(60,80,120,0.4); stroke-width: 8; }
+  .progress-ring-fill {
+    fill: none;
+    stroke: var(--accent-green);
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 314;
+    stroke-dashoffset: 314;
+    transform: rotate(-90deg);
+    transform-origin: center;
+    transition: stroke-dashoffset 0.8s cubic-bezier(.4,0,.2,1);
+    filter: drop-shadow(0 0 6px rgba(74,222,128,0.5));
+  }
+  .progress-ring-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  .progress-ring-pct {
+    font-family: 'VT323', monospace;
+    font-size: 28px;
+    color: var(--accent-green);
+    line-height: 1;
+  }
+  .progress-ring-label { font-size: 11px; color: var(--text-muted); font-weight: 700; }
+
+  .progress-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+  }
+  .stat-mini {
+    background: rgba(20,30,55,0.6);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    padding: 10px 12px;
+    text-align: center;
+  }
+  .stat-mini-val {
+    font-family: 'VT323', monospace;
+    font-size: 22px;
+    color: var(--text-primary);
+    line-height: 1;
+  }
+  .stat-mini-label { font-size: 11px; color: var(--text-muted); margin-top: 2px; font-weight: 600; }
+
+  /* ── CATEGORY FILTERS ── */
+  .cat-list { display: flex; flex-direction: column; gap: 4px; }
+  .cat-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.18s;
+    border: 1px solid transparent;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .cat-item:hover { background: rgba(40,60,110,0.5); border-color: var(--glass-border); }
+  .cat-item.active { background: rgba(60,100,180,0.35); border-color: rgba(96,165,250,0.4); color: var(--accent-blue); }
+  .cat-item-left { display: flex; align-items: center; gap: 9px; }
+  .cat-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+  .cat-count {
+    background: rgba(96,165,250,0.15);
+    border: 1px solid rgba(96,165,250,0.25);
+    border-radius: 20px;
+    padding: 2px 8px;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  /* ── CONTENT AREA ── */
+  .content { flex: 1; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+
+  /* ── CONTROLS BAR ── */
+  .controls-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+  }
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 15px;
+    pointer-events: none;
+  }
+  .search-input {
+    width: 100%;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    padding: 9px 14px 9px 36px;
+    color: var(--text-primary);
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    backdrop-filter: blur(12px);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-input::placeholder { color: var(--text-muted); }
+  .search-input:focus { border-color: rgba(96,165,250,0.5); }
+
+  .sort-select {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    padding: 9px 14px;
+    color: var(--text-primary);
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    backdrop-filter: blur(12px);
+  }
+
+  .filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 13px;
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    background: rgba(20,32,60,0.5);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.18s;
+    color: var(--text-muted);
+  }
+  .filter-chip:hover { border-color: rgba(150,200,255,0.35); color: var(--text-primary); }
+  .filter-chip.active { border-color: rgba(74,222,128,0.45); color: var(--accent-green); background: rgba(74,222,128,0.08); }
+
+  /* ── MATERIAL GRID ── */
+  .material-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 12px;
+  }
+
+  /* ── MATERIAL CARD ── */
+  .mat-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    backdrop-filter: blur(16px);
+    transition: all 0.22s;
+    position: relative;
+    overflow: hidden;
+  }
+  .mat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--card-accent, var(--glass-border)), transparent);
+    opacity: 0.6;
+  }
+  .mat-card:hover { transform: translateY(-2px); border-color: rgba(150,200,255,0.28); background: var(--glass-hover); }
+  .mat-card.complete { --card-accent: var(--accent-green); border-color: rgba(74,222,128,0.25); }
+  .mat-card.complete::before { background: linear-gradient(90deg, transparent, rgba(74,222,128,0.6), transparent); }
+  .mat-card.rare { --card-accent: var(--accent-purple); }
+  .mat-card.rare::before { background: linear-gradient(90deg, transparent, rgba(167,139,250,0.6), transparent); }
+
+  .mat-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .mat-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+    border: 2px solid rgba(255,255,255,0.08);
+    background: rgba(20,30,55,0.7);
+    image-rendering: pixelated;
+    position: relative;
+  }
+
+  .mat-icon-img {
+    width: 32px;
+    height: 32px;
+    image-rendering: pixelated;
+  }
+
+  .mat-info { flex: 1; min-width: 0; }
+  .mat-name {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mat-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 3px;
+    flex-wrap: wrap;
+  }
+  .mat-badge {
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    border: 1px solid;
+  }
+  .badge-stone { background: rgba(122,122,122,0.15); border-color: rgba(122,122,122,0.35); color: #aaa; }
+  .badge-wood { background: rgba(139,94,60,0.15); border-color: rgba(139,94,60,0.35); color: #c8926a; }
+  .badge-ore { background: rgba(74,226,208,0.12); border-color: rgba(74,226,208,0.35); color: var(--mc-diamond); }
+  .badge-rare { background: rgba(167,139,250,0.12); border-color: rgba(167,139,250,0.35); color: var(--accent-purple); }
+  .badge-plant { background: rgba(74,222,128,0.12); border-color: rgba(74,222,128,0.35); color: var(--accent-green); }
+  .badge-redstone { background: rgba(248,113,113,0.12); border-color: rgba(248,113,113,0.35); color: var(--accent-red); }
+  .badge-deco { background: rgba(251,191,36,0.12); border-color: rgba(251,191,36,0.35); color: var(--accent-yellow); }
+  .badge-glass { background: rgba(147,197,253,0.10); border-color: rgba(147,197,253,0.3); color: #93c5fd; }
+
+  .difficulty-dots {
+    display: flex;
+    gap: 3px;
+    align-items: center;
+  }
+  .diff-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+  }
+  .diff-dot.filled { background: var(--dot-color, #fbbf24); }
+
+  /* ── PROGRESS BAR ── */
+  .mat-progress {
+    margin-bottom: 11px;
+  }
+  .progress-bar-track {
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255,255,255,0.07);
+    overflow: hidden;
+    position: relative;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s cubic-bezier(.4,0,.2,1);
+    position: relative;
+  }
+  .progress-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 4px; height: 100%;
+    background: rgba(255,255,255,0.5);
+    border-radius: 0 3px 3px 0;
+  }
+  .progress-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .prog-have { color: var(--accent-green); }
+  .prog-need { color: var(--accent-red); }
+  .prog-pct { color: var(--text-muted); }
+
+  /* ── STORAGE INFO ── */
+  .storage-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 11px;
+    flex-wrap: wrap;
+  }
+  .storage-chip {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(20,30,55,0.65);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    flex: 1;
+    min-width: 0;
+    justify-content: center;
+  }
+  .storage-emoji { font-size: 14px; }
+  .storage-val { color: var(--text-primary); }
+  .storage-lbl { color: var(--text-muted); font-size: 11px; }
+
+  /* ── INPUT CONTROLS ── */
+  .mat-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .qty-input {
+    flex: 1;
+    min-width: 0;
+    background: rgba(20,30,55,0.7);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 7px 10px;
+    color: var(--text-primary);
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .qty-input:focus { border-color: rgba(96,165,250,0.5); }
+
+  .inc-btn {
+    padding: 7px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    background: rgba(30,50,90,0.5);
+    color: var(--text-primary);
+    font-family: 'VT323', monospace;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.18s;
+    white-space: nowrap;
+    font-weight: 700;
+  }
+  .inc-btn:hover { background: rgba(74,222,128,0.15); border-color: rgba(74,222,128,0.4); color: var(--accent-green); transform: translateY(-1px); }
+  .inc-btn:active { transform: translateY(0); }
+  .set-btn {
+    padding: 7px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(96,165,250,0.35);
+    background: rgba(96,165,250,0.12);
+    color: var(--accent-blue);
+    font-family: 'Nunito', sans-serif;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .set-btn:hover { background: rgba(96,165,250,0.25); }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--text-muted);
+  }
+  .empty-icon { font-size: 60px; margin-bottom: 16px; opacity: 0.5; }
+  .empty-title { font-family: 'Press Start 2P', monospace; font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
+  .empty-sub { font-size: 14px; line-height: 1.6; }
+
+  /* ── ANALYTICS BAR ── */
+  .analytics-bar {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+  }
+  .anal-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    backdrop-filter: blur(16px);
+    text-align: center;
+  }
+  .anal-val {
+    font-family: 'VT323', monospace;
+    font-size: 26px;
+    line-height: 1;
+    color: var(--text-primary);
+  }
+  .anal-label { font-size: 11px; color: var(--text-muted); font-weight: 700; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.8px; }
+
+  /* ── COMPLETE BADGE ── */
+  .complete-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(74,222,128,0.15);
+    border: 1px solid rgba(74,222,128,0.4);
+    border-radius: 20px;
+    padding: 3px 9px;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--accent-green);
+  }
+
+  /* ── TOAST ── */
+  .toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    z-index: 9999;
+  }
+  .toast {
+    background: rgba(8,14,26,0.92);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 12px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    backdrop-filter: blur(16px);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: toastIn 0.3s cubic-bezier(.4,0,.2,1);
+    min-width: 200px;
+  }
+  @keyframes toastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: none; } }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(60,90,150,0.4); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(96,165,250,0.4); }
+
+  /* ── PROJECT NAME ── */
+  .project-name-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--glass-border);
+    color: var(--accent-blue);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    padding: 4px 6px;
+    outline: none;
+    width: 160px;
+    transition: border-color 0.2s;
+  }
+  .project-name-input:focus { border-color: rgba(96,165,250,0.6); }
+
+  /* ── SAVE/LOAD ── */
+  .hidden-input { display: none; }
+
+  /* completion progress bar color */
+  .bar-green { background: linear-gradient(90deg, #22c55e, #4ade80); }
+  .bar-yellow { background: linear-gradient(90deg, #d97706, #fbbf24); }
+  .bar-red { background: linear-gradient(90deg, #dc2626, #f87171); }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-icon">⛏</div>
+      <div>
+        <div class="logo-text">SchematicForge</div>
+        <div class="logo-sub">Survival Build Manager</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:12px;color:var(--text-muted);font-weight:700;">Project:</span>
+      <input class="project-name-input" id="projectName" placeholder="My Build" value="Untitled Build">
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-sm btn-blue" onclick="document.getElementById('fileInput').click()">
+        📂 Load Schematic
+      </button>
+      <button class="btn btn-sm" onclick="saveProject()">💾 Save</button>
+      <button class="btn btn-sm" onclick="loadProject()">📁 Load Save</button>
+      <button class="btn btn-sm btn-green" onclick="exportChecklist()">📋 Export</button>
+      <input type="file" id="fileInput" class="hidden-input" accept=".txt" onchange="handleFileUpload(event)">
+      <input type="file" id="saveInput" class="hidden-input" accept=".json" onchange="handleSaveLoad(event)">
+    </div>
+  </header>
+
+  <!-- ANALYTICS BAR -->
+  <div style="padding:0 28px 16px;margin-top:16px;">
+    <div class="analytics-bar" id="analyticsBar">
+      <div class="anal-card">
+        <div class="anal-val" id="analTotal">0</div>
+        <div class="anal-label">Total Items</div>
+      </div>
+      <div class="anal-card">
+        <div class="anal-val" id="analComplete">0</div>
+        <div class="anal-label">Completed</div>
+      </div>
+      <div class="anal-card">
+        <div class="anal-val" id="analProgress" style="color:var(--accent-green)">0%</div>
+        <div class="anal-label">Progress</div>
+      </div>
+      <div class="anal-card">
+        <div class="anal-val" id="analShulkers" style="color:var(--accent-purple)">0</div>
+        <div class="anal-label">Shulkers Left</div>
+      </div>
+      <div class="anal-card">
+        <div class="anal-val" id="analMissing" style="color:var(--accent-red)">0</div>
+        <div class="anal-label">Items Missing</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <!-- Upload -->
+      <div class="glass-panel">
+        <div class="panel-header"><span class="panel-title">📄 Load File</span></div>
+        <div class="panel-body">
+          <div class="upload-zone" id="dropZone"
+            ondragover="event.preventDefault();this.classList.add('drag-over')"
+            ondragleave="this.classList.remove('drag-over')"
+            ondrop="handleDrop(event)"
+            onclick="document.getElementById('fileInput').click()">
+            <div class="upload-icon">📦</div>
+            <div class="upload-text">
+              <strong>Drop Litematica .txt</strong><br>
+              or click to browse<br>
+              <span style="font-size:11px;opacity:0.7">.txt material list format</span>
+            </div>
+          </div>
+          <div style="margin-top:12px;">
+            <button class="btn btn-sm btn-blue" style="width:100%;justify-content:center;" onclick="loadDemo()">
+              ✨ Load Demo Build
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overall Progress -->
+      <div class="glass-panel">
+        <div class="panel-header"><span class="panel-title">🏗 Build Progress</span></div>
+        <div class="panel-body">
+          <div class="progress-circle-wrap">
+            <div class="progress-ring-container">
+              <svg width="110" height="110" viewBox="0 0 110 110">
+                <circle class="progress-ring-bg" cx="55" cy="55" r="50"/>
+                <circle class="progress-ring-fill" id="progressRing" cx="55" cy="55" r="50"/>
+              </svg>
+              <div class="progress-ring-text">
+                <span class="progress-ring-pct" id="progressPct">0%</span>
+                <span class="progress-ring-label">DONE</span>
+              </div>
+            </div>
+            <div class="progress-stats" id="progressStats">
+              <div class="stat-mini">
+                <div class="stat-mini-val" id="statDone">0</div>
+                <div class="stat-mini-label">Done</div>
+              </div>
+              <div class="stat-mini">
+                <div class="stat-mini-val" style="color:var(--accent-red)" id="statLeft">0</div>
+                <div class="stat-mini-label">To Go</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Categories -->
+      <div class="glass-panel">
+        <div class="panel-header"><span class="panel-title">🗂 Categories</span></div>
+        <div class="panel-body" style="padding:10px 12px">
+          <div class="cat-list" id="categoryList"></div>
+        </div>
+      </div>
+
+      <!-- Storage Planner -->
+      <div class="glass-panel">
+        <div class="panel-header"><span class="panel-title">📦 Storage Needed</span></div>
+        <div class="panel-body" id="storageSummary">
+          <div style="text-align:center;padding:16px 0;color:var(--text-muted);font-size:13px;">
+            Load a schematic to see storage requirements
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="content">
+      <!-- Controls -->
+      <div class="controls-bar">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" id="searchInput" placeholder="Search materials..." oninput="renderMaterials()">
+        </div>
+        <select class="sort-select" id="sortSelect" onchange="renderMaterials()">
+          <option value="name">Sort: Name</option>
+          <option value="total_desc">Sort: Most Needed</option>
+          <option value="total_asc">Sort: Least Needed</option>
+          <option value="missing_desc">Sort: Most Missing</option>
+          <option value="pct_asc">Sort: Least Complete</option>
+          <option value="pct_desc">Sort: Most Complete</option>
+        </select>
+        <div class="filter-chip" id="chip-all" onclick="setFilter('all')" style="color:var(--text-primary)">All</div>
+        <div class="filter-chip" id="chip-incomplete" onclick="setFilter('incomplete')">⚠ Incomplete</div>
+        <div class="filter-chip" id="chip-complete" onclick="setFilter('complete')">✅ Complete</div>
+        <div class="filter-chip" id="chip-rare" onclick="setFilter('rare')">💎 Rare</div>
+      </div>
+
+      <!-- Material Grid -->
+      <div class="material-grid" id="materialGrid">
+        <div class="empty-state" style="grid-column:1/-1">
+          <div class="empty-icon">📦</div>
+          <div class="empty-title">No Schematic Loaded</div>
+          <div class="empty-sub">Load a Litematica material list (.txt)<br>or try the Demo Build to get started!</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+</div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let materials = [];
+let activeCategory = 'all';
+let activeFilter = 'all';
+
+// ─── MINECRAFT ITEM DATA ─────────────────────────────────────────────────────
+const ITEM_DATA = {
+  // Stone family
+  'stone': { emoji: '🪨', cat: 'stone', badge: 'badge-stone', diff: 1 },
+  'cobblestone': { emoji: '🪨', cat: 'stone', badge: 'badge-stone', diff: 1 },
+  'deepslate': { emoji: '🪨', cat: 'stone', badge: 'badge-stone', diff: 2 },
+  'andesite': { emoji: '🪨', cat: 'stone', badge: 'badge-stone', diff: 1 },
+  'granite': { emoji: '🪨', cat: 'stone', badge: 'badge-stone', diff: 1 },
+  'diorite': { emoji: '🪨', cat: 'stone', badge: 'badge-stone', diff: 1 },
+  'blackstone': { emoji: '⬛', cat: 'stone', badge: 'badge-stone', diff: 2 },
+  'basalt': { emoji: '🖤', cat: 'stone', badge: 'badge-stone', diff: 2 },
+  'tuff': { emoji: '🪨', cat: 'stone', badge: 'badge-stone', diff: 1 },
+  'calcite': { emoji: '🤍', cat: 'stone', badge: 'badge-stone', diff: 2 },
+  'smooth stone': { emoji: '🪨', cat: 'stone', badge: 'badge-stone', diff: 1 },
+  'stone brick': { emoji: '🧱', cat: 'stone', badge: 'badge-stone', diff: 1 },
+  'stone bricks': { emoji: '🧱', cat: 'stone', badge: 'badge-stone', diff: 1 },
+  'polished': { emoji: '🪨', cat: 'stone', badge: 'badge-stone', diff: 1 },
+  'cobbled': { emoji: '🪨', cat: 'stone', badge: 'badge-stone', diff: 1 },
+  'brick': { emoji: '🧱', cat: 'deco', badge: 'badge-deco', diff: 2 },
+  'bricks': { emoji: '🧱', cat: 'deco', badge: 'badge-deco', diff: 2 },
+  // Wood family
+  'oak': { emoji: '🪵', cat: 'wood', badge: 'badge-wood', diff: 1 },
+  'birch': { emoji: '🪵', cat: 'wood', badge: 'badge-wood', diff: 1 },
+  'spruce': { emoji: '🪵', cat: 'wood', badge: 'badge-wood', diff: 1 },
+  'jungle': { emoji: '🪵', cat: 'wood', badge: 'badge-wood', diff: 1 },
+  'acacia': { emoji: '🪵', cat: 'wood', badge: 'badge-wood', diff: 2 },
+  'dark oak': { emoji: '🪵', cat: 'wood', badge: 'badge-wood', diff: 2 },
+  'mangrove': { emoji: '🪵', cat: 'wood', badge: 'badge-wood', diff: 2 },
+  'cherry': { emoji: '🌸', cat: 'wood', badge: 'badge-wood', diff: 2 },
+  'wood': { emoji: '🪵', cat: 'wood', badge: 'badge-wood', diff: 1 },
+  'log': { emoji: '🪵', cat: 'wood', badge: 'badge-wood', diff: 1 },
+  'plank': { emoji: '🪵', cat: 'wood', badge: 'badge-wood', diff: 1 },
+  'planks': { emoji: '🪵', cat: 'wood', badge: 'badge-wood', diff: 1 },
+  'stick': { emoji: '🥢', cat: 'wood', badge: 'badge-wood', diff: 1 },
+  // Glass
+  'glass': { emoji: '🔷', cat: 'glass', badge: 'badge-glass', diff: 1 },
+  'stained glass': { emoji: '🟦', cat: 'glass', badge: 'badge-glass', diff: 2 },
+  // Ore / Minerals
+  'diamond': { emoji: '💎', cat: 'ore', badge: 'badge-ore', diff: 5 },
+  'emerald': { emoji: '💚', cat: 'ore', badge: 'badge-ore', diff: 5 },
+  'netherite': { emoji: '🔥', cat: 'ore', badge: 'badge-rare', diff: 5 },
+  'gold': { emoji: '🌟', cat: 'ore', badge: 'badge-ore', diff: 3 },
+  'iron': { emoji: '⚙️', cat: 'ore', badge: 'badge-ore', diff: 2 },
+  'copper': { emoji: '🟠', cat: 'ore', badge: 'badge-ore', diff: 2 },
+  'lapis': { emoji: '🔵', cat: 'ore', badge: 'badge-ore', diff: 3 },
+  'quartz': { emoji: '🤍', cat: 'ore', badge: 'badge-ore', diff: 3 },
+  'amethyst': { emoji: '🟣', cat: 'ore', badge: 'badge-ore', diff: 3 },
+  // Redstone
+  'redstone': { emoji: '🔴', cat: 'redstone', badge: 'badge-redstone', diff: 2 },
+  'piston': { emoji: '🔩', cat: 'redstone', badge: 'badge-redstone', diff: 2 },
+  'observer': { emoji: '👁', cat: 'redstone', badge: 'badge-redstone', diff: 2 },
+  'comparator': { emoji: '🔁', cat: 'redstone', badge: 'badge-redstone', diff: 3 },
+  'repeater': { emoji: '🔁', cat: 'redstone', badge: 'badge-redstone', diff: 2 },
+  'hopper': { emoji: '🔽', cat: 'redstone', badge: 'badge-redstone', diff: 2 },
+  'dispenser': { emoji: '📤', cat: 'redstone', badge: 'badge-redstone', diff: 2 },
+  'dropper': { emoji: '📤', cat: 'redstone', badge: 'badge-redstone', diff: 2 },
+  'lever': { emoji: '🕹', cat: 'redstone', badge: 'badge-redstone', diff: 1 },
+  // Plants / Nature
+  'grass': { emoji: '🌿', cat: 'plant', badge: 'badge-plant', diff: 1 },
+  'dirt': { emoji: '🟫', cat: 'plant', badge: 'badge-plant', diff: 1 },
+  'sand': { emoji: '🏖', cat: 'plant', badge: 'badge-plant', diff: 1 },
+  'gravel': { emoji: '⚫', cat: 'stone', badge: 'badge-stone', diff: 1 },
+  'leaves': { emoji: '🍃', cat: 'plant', badge: 'badge-plant', diff: 1 },
+  'flower': { emoji: '🌸', cat: 'plant', badge: 'badge-plant', diff: 1 },
+  'vine': { emoji: '🌿', cat: 'plant', badge: 'badge-plant', diff: 2 },
+  'moss': { emoji: '🌱', cat: 'plant', badge: 'badge-plant', diff: 2 },
+  'mud': { emoji: '🟫', cat: 'plant', badge: 'badge-plant', diff: 1 },
+  'clay': { emoji: '🟤', cat: 'plant', badge: 'badge-plant', diff: 2 },
+  // Rare / Nether
+  'obsidian': { emoji: '⬛', cat: 'rare', badge: 'badge-rare', diff: 4 },
+  'crying obsidian': { emoji: '💜', cat: 'rare', badge: 'badge-rare', diff: 4 },
+  'ancient debris': { emoji: '🔥', cat: 'rare', badge: 'badge-rare', diff: 5 },
+  'nether': { emoji: '🔥', cat: 'rare', badge: 'badge-rare', diff: 4 },
+  'end': { emoji: '🌌', cat: 'rare', badge: 'badge-rare', diff: 4 },
+  'shulker': { emoji: '🟪', cat: 'rare', badge: 'badge-rare', diff: 4 },
+  'elytra': { emoji: '🦅', cat: 'rare', badge: 'badge-rare', diff: 5 },
+  // Decorative
+  'wool': { emoji: '🐑', cat: 'deco', badge: 'badge-deco', diff: 2 },
+  'concrete': { emoji: '🟦', cat: 'deco', badge: 'badge-deco', diff: 1 },
+  'terracotta': { emoji: '🟫', cat: 'deco', badge: 'badge-deco', diff: 1 },
+  'carpet': { emoji: '🟦', cat: 'deco', badge: 'badge-deco', diff: 2 },
+  'banner': { emoji: '🚩', cat: 'deco', badge: 'badge-deco', diff: 2 },
+  'lantern': { emoji: '🏮', cat: 'deco', badge: 'badge-deco', diff: 2 },
+  'torch': { emoji: '🔦', cat: 'deco', badge: 'badge-deco', diff: 1 },
+  'candle': { emoji: '🕯', cat: 'deco', badge: 'badge-deco', diff: 2 },
+  'chain': { emoji: '⛓', cat: 'deco', badge: 'badge-deco', diff: 2 },
+  'iron bar': { emoji: '🔩', cat: 'deco', badge: 'badge-deco', diff: 2 },
+  'iron bars': { emoji: '🔩', cat: 'deco', badge: 'badge-deco', diff: 2 },
+  'fence': { emoji: '🪵', cat: 'wood', badge: 'badge-wood', diff: 1 },
+  'slab': { emoji: '🧱', cat: 'stone', badge: 'badge-stone', diff: 1 },
+  'stair': { emoji: '🧱', cat: 'stone', badge: 'badge-stone', diff: 1 },
+  'stairs': { emoji: '🧱', cat: 'stone', badge: 'badge-stone', diff: 1 },
+  'wall': { emoji: '🧱', cat: 'stone', badge: 'badge-stone', diff: 1 },
+  'door': { emoji: '🚪', cat: 'deco', badge: 'badge-deco', diff: 1 },
+  'trapdoor': { emoji: '🚪', cat: 'deco', badge: 'badge-deco', diff: 1 },
+  'barrel': { emoji: '🛢', cat: 'deco', badge: 'badge-deco', diff: 1 },
+  'chest': { emoji: '📦', cat: 'deco', badge: 'badge-deco', diff: 1 },
+  'bookshelf': { emoji: '📚', cat: 'deco', badge: 'badge-deco', diff: 2 },
+  'sea': { emoji: '🌊', cat: 'rare', badge: 'badge-rare', diff: 3 },
+  'prismarine': { emoji: '🌊', cat: 'rare', badge: 'badge-rare', diff: 3 },
+  'sponge': { emoji: '🟡', cat: 'rare', badge: 'badge-rare', diff: 4 },
+  'shroomlight': { emoji: '🍄', cat: 'rare', badge: 'badge-rare', diff: 3 },
+  'glowstone': { emoji: '💡', cat: 'deco', badge: 'badge-deco', diff: 3 },
+  'soul': { emoji: '👻', cat: 'rare', badge: 'badge-rare', diff: 3 },
+};
+
+const CATEGORIES = {
+  'all': { label: 'All Items', color: '#60a5fa', dot: '#60a5fa' },
+  'stone': { label: 'Stone & Rock', color: '#9ca3af', dot: '#6b7280' },
+  'wood': { label: 'Wood & Plants', color: '#a16207', dot: '#854d0e' },
+  'glass': { label: 'Glass', color: '#93c5fd', dot: '#60a5fa' },
+  'ore': { label: 'Ores & Minerals', color: '#4ae2d0', dot: '#14b8a6' },
+  'redstone': { label: 'Redstone', color: '#f87171', dot: '#dc2626' },
+  'plant': { label: 'Plants & Nature', color: '#4ade80', dot: '#16a34a' },
+  'rare': { label: 'Rare & Nether', color: '#a78bfa', dot: '#7c3aed' },
+  'deco': { label: 'Decorative', color: '#fbbf24', dot: '#d97706' },
+};
+
+function getItemData(name) {
+  const lower = name.toLowerCase();
+  for (const [key, data] of Object.entries(ITEM_DATA)) {
+    if (lower.includes(key)) return data;
+  }
+  return { emoji: '📦', cat: 'deco', badge: 'badge-deco', diff: 1 };
+}
+
+// ─── FILE PARSING ─────────────────────────────────────────────────────────────
+function parseLitematicaTxt(text) {
+  const items = [];
+  const lines = text.split('\n');
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+
+    // Try multiple Litematica formats:
+    // "Item Name x1234"
+    // "1234 Item Name"
+    // "Item Name: 1234"
+    // "| Item Name | 1234 |" (table format)
+
+    let match;
+
+    // Format: "Item Name x1234" or "Item Name: 1234"
+    match = trimmed.match(/^(.+?)\s*[x:]\s*(\d[\d,]*)\s*$/i);
+    if (!match) {
+      // Format: "1234 Item Name" or "1,234 Item Name"
+      match = trimmed.match(/^([\d,]+)\s+(.+)$/);
+      if (match) match = [match[0], match[2], match[1]];
+    }
+    if (!match) {
+      // Table format: "| Item Name | 1234 |"
+      const tableMatch = trimmed.match(/\|\s*(.+?)\s*\|\s*([\d,]+)\s*\|/);
+      if (tableMatch) match = tableMatch;
+    }
+    if (!match) {
+      // Tab-separated: "Item Name\t1234"
+      const tabMatch = trimmed.split('\t');
+      if (tabMatch.length >= 2) {
+        const numPart = tabMatch[tabMatch.length - 1].replace(/,/g, '');
+        if (/^\d+$/.test(numPart)) {
+          match = [trimmed, tabMatch.slice(0, -1).join(' '), numPart];
+        }
+      }
+    }
+
+    if (match) {
+      const name = match[1].trim().replace(/minecraft:/i, '').replace(/_/g, ' ');
+      const qty = parseInt(match[2].replace(/,/g, ''), 10);
+      if (name && qty > 0) {
+        items.push({ name, total: qty, have: 0 });
+      }
+    }
+  }
+
+  return items;
+}
+
+function handleFileUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const parsed = parseLitematicaTxt(e.target.result);
+    if (parsed.length === 0) {
+      toast('⚠ Could not parse file. Check format.', '#f87171');
+      return;
+    }
+    materials = parsed;
+    document.getElementById('projectName').value = file.name.replace('.txt','');
+    updateAll();
+    toast(`✅ Loaded ${parsed.length} materials!`, '#4ade80');
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function handleDrop(event) {
+  event.preventDefault();
+  document.getElementById('dropZone').classList.remove('drag-over');
+  const file = event.dataTransfer.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const parsed = parseLitematicaTxt(e.target.result);
+    if (parsed.length === 0) {
+      toast('⚠ Could not parse file.', '#f87171');
+      return;
+    }
+    materials = parsed;
+    updateAll();
+    toast(`✅ Loaded ${parsed.length} materials!`, '#4ade80');
+  };
+  reader.readAsText(file);
+}
+
+// ─── DEMO DATA ─────────────────────────────────────────────────────────────
+function loadDemo() {
+  materials = [
+    { name: 'Stone Bricks', total: 15360, have: 8192 },
+    { name: 'Oak Planks', total: 4096, have: 4096 },
+    { name: 'Dark Oak Log', total: 2048, have: 512 },
+    { name: 'Glass Pane', total: 1728, have: 864 },
+    { name: 'Diamond Block', total: 64, have: 12 },
+    { name: 'Netherite Block', total: 16, have: 2 },
+    { name: 'Smooth Stone Slab', total: 3456, have: 1728 },
+    { name: 'Stone Brick Stairs', total: 2048, have: 2048 },
+    { name: 'Iron Bars', total: 512, have: 256 },
+    { name: 'Redstone Lamp', total: 128, have: 64 },
+    { name: 'Obsidian', total: 256, have: 0 },
+    { name: 'Crying Obsidian', total: 128, have: 16 },
+    { name: 'Amethyst Block', total: 384, have: 192 },
+    { name: 'Copper Block', total: 768, have: 768 },
+    { name: 'Prismarine Bricks', total: 1024, have: 384 },
+    { name: 'Sea Lantern', total: 256, have: 128 },
+    { name: 'Moss Block', total: 512, have: 256 },
+    { name: 'Deepslate Tiles', total: 2048, have: 0 },
+    { name: 'Polished Blackstone', total: 1024, have: 512 },
+    { name: 'Candle', total: 64, have: 64 },
+    { name: 'Chain', total: 192, have: 96 },
+    { name: 'Lantern', total: 48, have: 48 },
+    { name: 'Shroomlight', total: 96, have: 32 },
+    { name: 'Glowstone', total: 320, have: 160 },
+  ];
+  document.getElementById('projectName').value = 'Medieval Castle Demo';
+  updateAll();
+  toast('🏰 Demo build loaded!', '#60a5fa');
+}
+
+// ─── CALCULATIONS ────────────────────────────────────────────────────────────
+function calcStorage(qty) {
+  const stacks = Math.ceil(qty / 64);
+  const shulkers = Math.ceil(stacks / 27);
+  const chests = Math.ceil(stacks / 54);
+  return { stacks, shulkers, chests };
+}
+
+// ─── UPDATE ALL ──────────────────────────────────────────────────────────────
+function updateAll() {
+  renderCategories();
+  renderMaterials();
+  renderAnalytics();
+  renderProgress();
+  renderStorageSummary();
+}
+
+// ─── ANALYTICS ───────────────────────────────────────────────────────────────
+function renderAnalytics() {
+  const total = materials.length;
+  const complete = materials.filter(m => m.have >= m.total).length;
+  const totalMissing = materials.reduce((s, m) => s + Math.max(0, m.total - m.have), 0);
+  const pct = total > 0 ? Math.round((complete / total) * 100) : 0;
+  const totalShulkersLeft = materials.reduce((s, m) => {
+    const missing = Math.max(0, m.total - m.have);
+    return s + calcStorage(missing).shulkers;
+  }, 0);
+
+  document.getElementById('analTotal').textContent = total;
+  document.getElementById('analComplete').textContent = complete;
+  document.getElementById('analProgress').textContent = pct + '%';
+  document.getElementById('analShulkers').textContent = totalShulkersLeft;
+  document.getElementById('analMissing').textContent = totalMissing.toLocaleString();
+}
+
+// ─── PROGRESS RING ───────────────────────────────────────────────────────────
+function renderProgress() {
+  const total = materials.length;
+  const complete = materials.filter(m => m.have >= m.total).length;
+  const pct = total > 0 ? complete / total : 0;
+  const circumference = 314;
+  const offset = circumference - (pct * circumference);
+
+  document.getElementById('progressRing').style.strokeDashoffset = offset;
+  document.getElementById('progressPct').textContent = Math.round(pct * 100) + '%';
+  document.getElementById('statDone').textContent = complete;
+  document.getElementById('statLeft').textContent = total - complete;
+}
+
+// ─── CATEGORIES ──────────────────────────────────────────────────────────────
+function renderCategories() {
+  const counts = { all: materials.length };
+  for (const m of materials) {
+    const cat = getItemData(m.name).cat;
+    counts[cat] = (counts[cat] || 0) + 1;
+  }
+
+  const list = document.getElementById('categoryList');
+  list.innerHTML = '';
+
+  for (const [key, info] of Object.entries(CATEGORIES)) {
+    if (key !== 'all' && !counts[key]) continue;
+    const item = document.createElement('div');
+    item.className = 'cat-item' + (activeCategory === key ? ' active' : '');
+    item.innerHTML = `
+      <div class="cat-item-left">
+        <div class="cat-dot" style="background:${info.dot}"></div>
+        <span>${info.label}</span>
+      </div>
+      <span class="cat-count">${counts[key] || 0}</span>`;
+    item.onclick = () => { activeCategory = key; renderCategories(); renderMaterials(); };
+    list.appendChild(item);
+  }
+}
+
+// ─── STORAGE SUMMARY ─────────────────────────────────────────────────────────
+function renderStorageSummary() {
+  const el = document.getElementById('storageSummary');
+  if (!materials.length) {
+    el.innerHTML = '<div style="text-align:center;padding:16px 0;color:var(--text-muted);font-size:13px;">Load a schematic first</div>';
+    return;
+  }
+  const totalMissing = materials.reduce((s, m) => s + Math.max(0, m.total - m.have), 0);
+  const storage = calcStorage(totalMissing);
+
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div class="stat-mini"><div class="stat-mini-val" style="color:var(--accent-yellow)">${storage.stacks.toLocaleString()}</div><div class="stat-mini-label">📦 Stacks</div></div>
+      <div class="stat-mini"><div class="stat-mini-val" style="color:var(--accent-purple)">${storage.shulkers.toLocaleString()}</div><div class="stat-mini-label">🟪 Shulkers</div></div>
+      <div class="stat-mini" style="grid-column:1/-1"><div class="stat-mini-val" style="color:var(--accent-blue)">${storage.chests.toLocaleString()}</div><div class="stat-mini-label">📦 Double Chests</div></div>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--text-muted);text-align:center">For all remaining materials</div>`;
+}
+
+// ─── FILTER / SORT ───────────────────────────────────────────────────────────
+function setFilter(f) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  document.getElementById('chip-' + f)?.classList.add('active');
+  renderMaterials();
+}
+
+// ─── RENDER MATERIALS ─────────────────────────────────────────────────────────
+function renderMaterials() {
+  const grid = document.getElementById('materialGrid');
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const sort = document.getElementById('sortSelect').value;
+
+  let filtered = [...materials];
+
+  // Category filter
+  if (activeCategory !== 'all') {
+    filtered = filtered.filter(m => getItemData(m.name).cat === activeCategory);
+  }
+  // Status filter
+  if (activeFilter === 'incomplete') filtered = filtered.filter(m => m.have < m.total);
+  if (activeFilter === 'complete') filtered = filtered.filter(m => m.have >= m.total);
+  if (activeFilter === 'rare') filtered = filtered.filter(m => getItemData(m.name).diff >= 4);
+  // Search
+  if (search) filtered = filtered.filter(m => m.name.toLowerCase().includes(search));
+
+  // Sort
+  filtered.sort((a, b) => {
+    const ap = a.have / a.total, bp = b.have / b.total;
+    if (sort === 'name') return a.name.localeCompare(b.name);
+    if (sort === 'total_desc') return b.total - a.total;
+    if (sort === 'total_asc') return a.total - b.total;
+    if (sort === 'missing_desc') return (b.total - b.have) - (a.total - a.have);
+    if (sort === 'pct_asc') return ap - bp;
+    if (sort === 'pct_desc') return bp - ap;
+    return 0;
+  });
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">
+      <div class="empty-icon">${materials.length === 0 ? '📦' : '🔍'}</div>
+      <div class="empty-title">${materials.length === 0 ? 'No Schematic Loaded' : 'No Matches'}</div>
+      <div class="empty-sub">${materials.length === 0 ? 'Load a Litematica .txt file or try the Demo Build!' : 'Try a different search or filter.'}</div>
+    </div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(m => renderCard(m)).join('');
+}
+
+function renderCard(m) {
+  const idata = getItemData(m.name);
+  const pct = Math.min(100, Math.round((m.have / m.total) * 100));
+  const missing = Math.max(0, m.total - m.have);
+  const storage = calcStorage(missing);
+  const complete = m.have >= m.total;
+  const barClass = pct >= 100 ? 'bar-green' : pct >= 50 ? 'bar-yellow' : 'bar-red';
+  const diffColors = ['#6b7280','#22c55e','#eab308','#f97316','#ef4444','#8b5cf6'];
+  const diffColor = diffColors[Math.min(idata.diff, 5)];
+
+  const diffDots = Array.from({length: 5}, (_, i) =>
+    `<div class="diff-dot ${i < idata.diff ? 'filled' : ''}" style="--dot-color:${diffColor}"></div>`
+  ).join('');
+
+  const idx = materials.indexOf(m);
+
+  return `
+  <div class="mat-card ${complete ? 'complete' : ''} ${idata.diff >= 4 ? 'rare' : ''}" data-idx="${idx}">
+    ${complete ? '<div class="complete-badge">✓ COMPLETE</div>' : ''}
+    <div class="mat-top">
+      <div class="mat-icon">${idata.emoji}</div>
+      <div class="mat-info">
+        <div class="mat-name">${m.name}</div>
+        <div class="mat-meta">
+          <span class="mat-badge ${idata.badge}">${CATEGORIES[idata.cat]?.label || idata.cat}</span>
+          <div class="difficulty-dots" title="Difficulty: ${idata.diff}/5">${diffDots}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mat-progress">
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill ${barClass}" style="width:${pct}%"></div>
+      </div>
+      <div class="progress-labels">
+        <span class="prog-have">Have: ${m.have.toLocaleString()}</span>
+        <span class="prog-pct">${pct}%</span>
+        <span class="prog-need">Need: ${missing.toLocaleString()}</span>
+      </div>
+    </div>
+
+    <div class="storage-row">
+      <div class="storage-chip">
+        <span class="storage-emoji">📦</span>
+        <span class="storage-val">${calcStorage(m.total).stacks}</span>
+        <span class="storage-lbl">stacks total</span>
+      </div>
+      <div class="storage-chip">
+        <span class="storage-emoji">🟪</span>
+        <span class="storage-val">${storage.shulkers}</span>
+        <span class="storage-lbl">shulkers left</span>
+      </div>
+      <div class="storage-chip">
+        <span class="storage-emoji">📊</span>
+        <span class="storage-val">${m.total.toLocaleString()}</span>
+        <span class="storage-lbl">total needed</span>
+      </div>
+    </div>
+
+    <div class="mat-controls">
+      <button class="inc-btn" onclick="addAmount(${idx}, 64)" title="Add 1 stack (+64)">+64</button>
+      <button class="inc-btn" onclick="addAmount(${idx}, 1728)" title="Add 1 shulker box (+1728)">+🟪</button>
+      <input class="qty-input" id="inp-${idx}" type="number" min="0" value="${m.have}" placeholder="0"
+        onchange="setAmount(${idx}, this.value)" oninput="setAmount(${idx}, this.value)">
+      <button class="set-btn" onclick="setFull(${idx})">✓ Full</button>
+      <button class="inc-btn" style="color:var(--accent-red);border-color:rgba(248,113,113,0.3)" onclick="clearAmount(${idx})">✕</button>
+    </div>
+  </div>`;
+}
+
+// ─── AMOUNT CONTROLS ─────────────────────────────────────────────────────────
+function addAmount(idx, n) {
+  materials[idx].have = Math.min(materials[idx].total, materials[idx].have + n);
+  updateAll();
+}
+function setAmount(idx, val) {
+  const n = parseInt(val) || 0;
+  materials[idx].have = Math.min(materials[idx].total, Math.max(0, n));
+  updateAll();
+}
+function setFull(idx) {
+  materials[idx].have = materials[idx].total;
+  updateAll();
+  toast('✅ ' + materials[idx].name + ' complete!', '#4ade80');
+}
+function clearAmount(idx) {
+  materials[idx].have = 0;
+  updateAll();
+}
+
+// ─── SAVE / LOAD ─────────────────────────────────────────────────────────────
+function saveProject() {
+  const data = {
+    name: document.getElementById('projectName').value,
+    materials,
+    saved: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (data.name || 'schematic') + '.sf.json';
+  a.click();
+  toast('💾 Project saved!', '#60a5fa');
+}
+function loadProject() {
+  document.getElementById('saveInput').click();
+}
+function handleSaveLoad(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      materials = data.materials || [];
+      if (data.name) document.getElementById('projectName').value = data.name;
+      updateAll();
+      toast('📁 Project loaded!', '#4ade80');
+    } catch {
+      toast('⚠ Invalid save file.', '#f87171');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ─── EXPORT CHECKLIST ────────────────────────────────────────────────────────
+function exportChecklist() {
+  if (!materials.length) { toast('⚠ No materials to export', '#f87171'); return; }
+  const name = document.getElementById('projectName').value || 'Build';
+  let txt = `SchematicForge Export — ${name}\n${'='.repeat(50)}\n\n`;
+  const done = materials.filter(m => m.have >= m.total);
+  const todo = materials.filter(m => m.have < m.total);
+
+  txt += `PROGRESS: ${done.length}/${materials.length} complete\n\n`;
+  txt += `TODO:\n`;
+  for (const m of todo) {
+    const missing = m.total - m.have;
+    const s = calcStorage(missing);
+    txt += `[ ] ${m.name.padEnd(30)} Need: ${missing.toString().padStart(6)}  (${s.stacks} stacks / ${s.shulkers} shulkers)\n`;
+  }
+  if (done.length) {
+    txt += `\nCOMPLETE:\n`;
+    for (const m of done) txt += `[✓] ${m.name}\n`;
+  }
+
+  const blob = new Blob([txt], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name + '-checklist.txt';
+  a.click();
+  toast('📋 Checklist exported!', '#4ade80');
+}
+
+// ─── TOAST ───────────────────────────────────────────────────────────────────
+function toast(msg, color = '#60a5fa') {
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.style.borderColor = color + '55';
+  el.style.color = color;
+  el.textContent = msg;
+  const container = document.getElementById('toastContainer');
+  container.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+setFilter('all');
+renderCategories();
+</script>
+</body>
+</html>
