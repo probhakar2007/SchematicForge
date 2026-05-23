@@ -1427,8 +1427,9 @@ ${msg}
 ---
 Sent from SchematicForge Help Center`
   );
-  window.location.href = `mailto:probhakarwork2007@gmail.com?subject=${subject}&body=${body}`;
-  toast('✉ Opening your email client…', 'var(--lime)');
+  const gmailUrl = `https://mail.google.com/mail/?view=cm&to=probhakarwork2007@gmail.com&su=${subject}&body=${body}`;
+  window.open(gmailUrl, '_blank');
+  toast('✉ Opening Gmail…', 'var(--lime)');
 }
 
 /* ═══════════════════════════════════════════════════
