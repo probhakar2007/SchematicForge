@@ -3,855 +3,889 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SchematicForge v2 — Minecraft Build Manager</title>
-<link href="https://fonts.googleapis.com/css2?family=VT323&family=Press+Start+2P&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title>SchematicForge</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@500;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --glass-bg: rgba(15, 20, 35, 0.72);
-    --glass-border: rgba(120, 180, 255, 0.18);
-    --glass-hover: rgba(30, 45, 70, 0.85);
-    --panel-bg: rgba(8, 14, 26, 0.80);
-    --accent-green: #4ade80;
-    --accent-blue: #60a5fa;
-    --accent-yellow: #fbbf24;
-    --accent-red: #f87171;
-    --accent-purple: #a78bfa;
-    --accent-orange: #fb923c;
-    --text-primary: #e8f0ff;
-    --text-muted: #8899bb;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Nunito', sans-serif;
-    background: #0a0e1a;
-    color: var(--text-primary);
-    min-height: 100vh;
-    overflow-x: hidden;
-    position: relative;
-  }
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background:
-      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(30,80,160,0.18) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 50% at 80% 80%, rgba(15,120,80,0.13) 0%, transparent 55%),
-      radial-gradient(ellipse 50% 40% at 60% 30%, rgba(100,40,180,0.10) 0%, transparent 50%);
-    pointer-events: none; z-index: 0;
-  }
-  body::after {
-    content: '';
-    position: fixed; inset: 0;
-    background-image:
-      linear-gradient(rgba(60,100,200,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(60,100,200,0.04) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none; z-index: 0;
-  }
-  #app { position: relative; z-index: 1; min-height: 100vh; display: flex; flex-direction: column; }
+/* ═══ RESET & ROOT ═══════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
 
-  /* ── HEADER ── */
-  .header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 24px;
-    background: rgba(8,14,26,0.92);
-    border-bottom: 1px solid var(--glass-border);
-    backdrop-filter: blur(16px);
-    position: sticky; top: 0; z-index: 200;
-    gap: 12px; flex-wrap: wrap;
-  }
-  .logo { display: flex; align-items: center; gap: 10px; }
-  .logo-icon {
-    width: 34px; height: 34px;
-    background: linear-gradient(135deg, #4ade80, #22c55e);
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
-    box-shadow: 0 0 14px rgba(74,222,128,0.35);
-  }
-  .logo-text { font-family: 'Press Start 2P', monospace; font-size: 10px; color: var(--accent-green); letter-spacing: 1px; }
-  .logo-sub { font-size: 10px; color: var(--text-muted); margin-top: 2px; font-weight: 600; }
-  .header-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+:root {
+  --ink:    #0b0d12;
+  --ink2:   #12151e;
+  --ink3:   #181d2a;
+  --ink4:   #1f2535;
+  --ink5:   #273040;
+  --line:   rgba(255,255,255,0.06);
+  --line2:  rgba(255,255,255,0.11);
 
-  /* ── BUTTONS ── */
-  .btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 7px 14px; border-radius: 9px;
-    border: 1px solid var(--glass-border);
-    background: rgba(30,50,90,0.45);
-    color: var(--text-primary);
-    font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12px;
-    cursor: pointer; transition: all 0.2s; backdrop-filter: blur(8px);
-  }
-  .btn:hover { background: rgba(60,90,160,0.55); border-color: rgba(150,200,255,0.35); transform: translateY(-1px); }
-  .btn:active { transform: translateY(0); }
-  .btn-green { border-color: rgba(74,222,128,0.4); color: var(--accent-green); }
-  .btn-green:hover { background: rgba(74,222,128,0.15); }
-  .btn-blue { border-color: rgba(96,165,250,0.4); color: var(--accent-blue); }
-  .btn-blue:hover { background: rgba(96,165,250,0.15); }
-  .btn-red { border-color: rgba(248,113,113,0.4); color: var(--accent-red); }
-  .btn-red:hover { background: rgba(248,113,113,0.12); }
-  .btn-sm { padding: 5px 10px; font-size: 11px; border-radius: 7px; }
-  .btn-icon { padding: 5px 8px; }
+  --lime:   #5cdd8b;
+  --lime2:  #3ab869;
+  --lime-g: rgba(92,221,139,0.12);
+  --sapph:  #5b9ef9;
+  --sapph-g:rgba(91,158,249,0.12);
+  --gold:   #f0c040;
+  --gold-g: rgba(240,192,64,0.12);
+  --ember:  #ff6b6b;
+  --ember-g:rgba(255,107,107,0.12);
+  --ameth:  #c084fc;
+  --ameth-g:rgba(192,132,252,0.12);
+  --coral:  #fb923c;
 
-  /* ── LAYOUT ── */
-  .main { display: flex; gap: 16px; padding: 16px 20px; flex: 1; min-height: 0; }
+  --t1: #edf2ff;
+  --t2: #7d8db0;
+  --t3: #424e6a;
 
-  /* ── HISTORY PANEL ── */
-  .history-panel {
-    width: 220px; flex-shrink: 0;
-    display: flex; flex-direction: column; gap: 0;
-    background: rgba(8,14,26,0.80);
-    border: 1px solid var(--glass-border);
-    border-radius: 14px; overflow: hidden;
-  }
-  .history-header {
-    padding: 12px 14px 10px;
-    border-bottom: 1px solid var(--glass-border);
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .history-title { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); }
-  .history-actions { display: flex; gap: 5px; }
-  .history-list { flex: 1; overflow-y: auto; padding: 6px; }
-  .history-list::-webkit-scrollbar { width: 4px; }
-  .history-list::-webkit-scrollbar-thumb { background: rgba(60,90,150,0.4); border-radius: 2px; }
+  --r: 10px;
+  --rs: 6px;
+  --sh: 0 2px 16px rgba(0,0,0,0.5);
+  --sh2: 0 8px 32px rgba(0,0,0,0.6);
+}
 
-  .hist-item {
-    display: flex; align-items: center; gap: 8px;
-    padding: 9px 10px; border-radius: 9px; cursor: pointer;
-    transition: all 0.18s; border: 1px solid transparent;
-    margin-bottom: 3px; position: relative;
-  }
-  .hist-item:hover { background: rgba(40,60,110,0.5); border-color: var(--glass-border); }
-  .hist-item.active {
-    background: rgba(60,100,180,0.35);
-    border-color: rgba(96,165,250,0.4);
-  }
-  .hist-item-icon { font-size: 18px; flex-shrink: 0; }
-  .hist-item-info { flex: 1; min-width: 0; }
-  .hist-item-name {
-    font-size: 12px; font-weight: 800; color: var(--text-primary);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .hist-item.active .hist-item-name { color: var(--accent-blue); }
-  .hist-item-meta { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
-  .hist-item-pct {
-    font-family: 'VT323', monospace; font-size: 15px;
-    flex-shrink: 0;
-  }
-  .hist-del {
-    position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
-    opacity: 0; background: rgba(248,113,113,0.15);
-    border: 1px solid rgba(248,113,113,0.3);
-    border-radius: 5px; padding: 2px 5px;
-    font-size: 10px; color: var(--accent-red);
-    cursor: pointer; transition: opacity 0.15s;
-  }
-  .hist-item:hover .hist-del { opacity: 1; }
+body {
+  font-family: 'Barlow', sans-serif;
+  background: var(--ink);
+  color: var(--t1);
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+}
 
-  .history-empty {
-    padding: 24px 12px; text-align: center;
-    font-size: 12px; color: var(--text-muted); line-height: 1.6;
-  }
+/* scrollbars */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--ink5); border-radius: 2px; }
 
-  /* ── SIDEBAR ── */
-  .sidebar {
-    width: 250px; flex-shrink: 0;
-    display: flex; flex-direction: column; gap: 12px;
-  }
-  .glass-panel {
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: 14px; backdrop-filter: blur(20px); overflow: hidden;
-  }
-  .panel-header {
-    padding: 11px 14px; border-bottom: 1px solid var(--glass-border);
-    display: flex; align-items: center; justify-content: space-between;
-  }
-  .panel-title { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); }
-  .panel-body { padding: 13px 14px; }
+/* ═══ TOPBAR ══════════════════════════════════════════════════════════════════ */
+.top {
+  height: 52px;
+  background: var(--ink2);
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 18px;
+  flex-shrink: 0;
+  z-index: 50;
+}
 
-  /* ── UPLOAD ZONE ── */
-  .upload-zone {
-    border: 2px dashed rgba(96,165,250,0.35); border-radius: 10px;
-    padding: 20px 12px; text-align: center; cursor: pointer;
-    transition: all 0.25s; background: rgba(96,165,250,0.04);
-  }
-  .upload-zone:hover, .upload-zone.drag-over {
-    border-color: rgba(96,165,250,0.7); background: rgba(96,165,250,0.10);
-  }
-  .upload-icon { font-size: 26px; margin-bottom: 7px; }
-  .upload-text { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
-  .upload-text strong { color: var(--accent-blue); }
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  flex-shrink: 0;
+}
+.logo-box {
+  width: 30px; height: 30px;
+  background: linear-gradient(145deg, var(--lime), var(--lime2));
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+  box-shadow: 0 0 12px rgba(92,221,139,0.35);
+}
+.logo-text {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--lime);
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+.logo-sub { font-size: 10px; color: var(--t3); font-weight: 500; margin-top: 1px; }
 
-  /* ── PROGRESS RING ── */
-  .progress-circle-wrap { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 8px 0 4px; }
-  .progress-ring-container { position: relative; width: 96px; height: 96px; }
-  .progress-ring-bg { fill: none; stroke: rgba(60,80,120,0.4); stroke-width: 7; }
-  .progress-ring-fill {
-    fill: none; stroke: var(--accent-green); stroke-width: 7;
-    stroke-linecap: round; stroke-dasharray: 276; stroke-dashoffset: 276;
-    transform: rotate(-90deg); transform-origin: center;
-    transition: stroke-dashoffset 0.8s cubic-bezier(.4,0,.2,1);
-    filter: drop-shadow(0 0 5px rgba(74,222,128,0.5));
-  }
-  .progress-ring-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-  .progress-ring-pct { font-family: 'VT323', monospace; font-size: 24px; color: var(--accent-green); line-height: 1; }
-  .progress-ring-label { font-size: 10px; color: var(--text-muted); font-weight: 700; }
-  .progress-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%; }
-  .stat-mini { background: rgba(20,30,55,0.6); border: 1px solid var(--glass-border); border-radius: 8px; padding: 8px 10px; text-align: center; }
-  .stat-mini-val { font-family: 'VT323', monospace; font-size: 20px; color: var(--text-primary); line-height: 1; }
-  .stat-mini-label { font-size: 10px; color: var(--text-muted); margin-top: 2px; font-weight: 600; }
+.proj-tag {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--ink4);
+  border: 1px solid var(--line2);
+  border-radius: 20px;
+  padding: 5px 13px 5px 10px;
+  cursor: pointer;
+  transition: all .18s;
+  max-width: 210px;
+}
+.proj-tag:hover { background: var(--ink5); border-color: rgba(255,255,255,0.16); }
+.proj-led {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--t3);
+  flex-shrink: 0;
+  transition: all .3s;
+}
+.proj-led.on { background: var(--lime); box-shadow: 0 0 6px var(--lime); }
+.proj-tag-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--t2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  transition: color .18s;
+}
+.proj-tag:hover .proj-tag-name, .proj-tag.has .proj-tag-name { color: var(--t1); }
 
-  /* ── CATEGORIES ── */
-  .cat-list { display: flex; flex-direction: column; gap: 3px; }
-  .cat-item {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 7px 10px; border-radius: 8px; cursor: pointer;
-    transition: all 0.18s; border: 1px solid transparent; font-size: 12px; font-weight: 700;
-  }
-  .cat-item:hover { background: rgba(40,60,110,0.5); border-color: var(--glass-border); }
-  .cat-item.active { background: rgba(60,100,180,0.35); border-color: rgba(96,165,250,0.4); color: var(--accent-blue); }
-  .cat-item-left { display: flex; align-items: center; gap: 8px; }
-  .cat-dot { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
-  .cat-count { background: rgba(96,165,250,0.15); border: 1px solid rgba(96,165,250,0.25); border-radius: 20px; padding: 1px 7px; font-size: 10px; color: var(--text-muted); }
+.flex1 { flex: 1; }
 
-  /* ── CONTENT ── */
-  .content { flex: 1; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+/* top buttons */
+.tbtn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 13px;
+  border-radius: var(--rs);
+  border: 1px solid var(--line);
+  background: var(--ink3);
+  color: var(--t2);
+  font-family: 'Barlow', sans-serif;
+  font-size: 12px; font-weight: 700;
+  cursor: pointer;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.tbtn:hover { background: var(--ink5); border-color: var(--line2); color: var(--t1); }
+.tbtn-lime { color: var(--lime); border-color: rgba(92,221,139,0.3); background: var(--lime-g); }
+.tbtn-lime:hover { background: rgba(92,221,139,0.2); border-color: var(--lime); }
+.tbtn-blue { color: var(--sapph); border-color: rgba(91,158,249,0.3); background: var(--sapph-g); }
+.tbtn-blue:hover { background: rgba(91,158,249,0.2); border-color: var(--sapph); }
+input[type=file] { display: none; }
 
-  /* ── ANALYTICS BAR ── */
-  .analytics-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
-  .anal-card {
-    background: var(--glass-bg); border: 1px solid var(--glass-border);
-    border-radius: 10px; padding: 11px 12px; backdrop-filter: blur(16px); text-align: center;
-  }
-  .anal-val { font-family: 'VT323', monospace; font-size: 24px; line-height: 1; color: var(--text-primary); }
-  .anal-label { font-size: 10px; color: var(--text-muted); font-weight: 700; margin-top: 2px; text-transform: uppercase; letter-spacing: 0.8px; }
+/* ═══ BODY LAYOUT ════════════════════════════════════════════════════════════ */
+.body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
 
-  /* ── CONTROLS BAR ── */
-  .controls-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .search-wrap { position: relative; flex: 1; min-width: 180px; }
-  .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 13px; pointer-events: none; }
-  .search-input {
-    width: 100%; background: var(--glass-bg); border: 1px solid var(--glass-border);
-    border-radius: 9px; padding: 8px 12px 8px 30px;
-    color: var(--text-primary); font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 600;
-    backdrop-filter: blur(12px); outline: none; transition: border-color 0.2s;
-  }
-  .search-input::placeholder { color: var(--text-muted); }
-  .search-input:focus { border-color: rgba(96,165,250,0.5); }
-  .sort-select {
-    background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 9px;
-    padding: 8px 12px; color: var(--text-primary);
-    font-family: 'Nunito', sans-serif; font-size: 12px; font-weight: 600;
-    cursor: pointer; outline: none; backdrop-filter: blur(12px);
-  }
-  .filter-chip {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 6px 11px; border-radius: 20px; border: 1px solid var(--glass-border);
-    background: rgba(20,32,60,0.5); font-size: 11px; font-weight: 700;
-    cursor: pointer; transition: all 0.18s; color: var(--text-muted);
-  }
-  .filter-chip:hover { border-color: rgba(150,200,255,0.35); color: var(--text-primary); }
-  .filter-chip.active { border-color: rgba(74,222,128,0.45); color: var(--accent-green); background: rgba(74,222,128,0.08); }
+/* ═══ LEFT RAIL ══════════════════════════════════════════════════════════════ */
+.rail {
+  width: 230px;
+  flex-shrink: 0;
+  background: var(--ink2);
+  border-right: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
 
-  /* ── MATERIAL GRID ── */
-  .material-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 10px; }
+.rail-sec {
+  padding: 12px 12px 10px;
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.rail-label {
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.8px;
+  color: var(--t3);
+  margin-bottom: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
 
-  /* ── MATERIAL CARD ── */
-  .mat-card {
-    background: var(--glass-bg); border: 1px solid var(--glass-border);
-    border-radius: 12px; padding: 12px 14px;
-    backdrop-filter: blur(16px); transition: all 0.22s; position: relative; overflow: hidden;
-  }
-  .mat-card::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, transparent, var(--card-accent, var(--glass-border)), transparent); opacity: 0.6;
-  }
-  .mat-card:hover { transform: translateY(-2px); border-color: rgba(150,200,255,0.28); background: var(--glass-hover); }
-  .mat-card.complete { --card-accent: var(--accent-green); border-color: rgba(74,222,128,0.25); }
-  .mat-card.complete::before { background: linear-gradient(90deg, transparent, rgba(74,222,128,0.6), transparent); }
-  .mat-card.rare::before { background: linear-gradient(90deg, transparent, rgba(167,139,250,0.6), transparent); }
-  .mat-top { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-  .mat-icon { width: 42px; height: 42px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; border: 2px solid rgba(255,255,255,0.08); background: rgba(20,30,55,0.7); }
-  .mat-info { flex: 1; min-width: 0; }
-  .mat-name { font-size: 13px; font-weight: 800; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .mat-meta { display: flex; align-items: center; gap: 6px; margin-top: 3px; flex-wrap: wrap; }
-  .mat-badge { padding: 2px 7px; border-radius: 20px; font-size: 10px; font-weight: 700; border: 1px solid; }
-  .badge-stone { background: rgba(122,122,122,0.15); border-color: rgba(122,122,122,0.35); color: #aaa; }
-  .badge-wood { background: rgba(139,94,60,0.15); border-color: rgba(139,94,60,0.35); color: #c8926a; }
-  .badge-ore { background: rgba(74,226,208,0.12); border-color: rgba(74,226,208,0.35); color: #4AE2D0; }
-  .badge-rare { background: rgba(167,139,250,0.12); border-color: rgba(167,139,250,0.35); color: var(--accent-purple); }
-  .badge-plant { background: rgba(74,222,128,0.12); border-color: rgba(74,222,128,0.35); color: var(--accent-green); }
-  .badge-redstone { background: rgba(248,113,113,0.12); border-color: rgba(248,113,113,0.35); color: var(--accent-red); }
-  .badge-deco { background: rgba(251,191,36,0.12); border-color: rgba(251,191,36,0.35); color: var(--accent-yellow); }
-  .badge-glass { background: rgba(147,197,253,0.10); border-color: rgba(147,197,253,0.3); color: #93c5fd; }
-  .difficulty-dots { display: flex; gap: 3px; align-items: center; }
-  .diff-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.12); }
-  .diff-dot.filled { background: var(--dot-color, #fbbf24); }
-  .complete-badge { position: absolute; top: 9px; right: 9px; background: rgba(74,222,128,0.15); border: 1px solid rgba(74,222,128,0.4); border-radius: 20px; padding: 2px 8px; font-size: 10px; font-weight: 800; color: var(--accent-green); }
+/* history */
+.hist {
+  max-height: 195px;
+  overflow-y: auto;
+  padding: 5px 6px;
+  border-bottom: 1px solid var(--line);
+}
+.hrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 9px;
+  border-radius: var(--rs);
+  cursor: pointer;
+  transition: all .15s;
+  border: 1px solid transparent;
+  margin-bottom: 2px;
+  position: relative;
+}
+.hrow:hover { background: var(--ink4); border-color: var(--line); }
+.hrow.act { background: var(--sapph-g); border-color: rgba(91,158,249,0.28); }
+.hrow-emo { font-size: 17px; flex-shrink: 0; width: 24px; text-align: center; }
+.hrow-data { flex: 1; min-width: 0; }
+.hrow-name { font-size: 11px; font-weight: 700; color: var(--t1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hrow.act .hrow-name { color: var(--sapph); }
+.hrow-meta { font-size: 9px; color: var(--t3); margin-top: 1px; }
+.hrow-pct { font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+.hrow-del {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  width: 16px; height: 16px; border-radius: 4px;
+  background: var(--ember-g); border: 1px solid rgba(255,107,107,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 8px; color: var(--ember);
+  cursor: pointer; opacity: 0; transition: opacity .15s;
+}
+.hrow:hover .hrow-del { opacity: 1; }
+.hempty { padding: 14px; font-size: 11px; color: var(--t3); text-align: center; }
 
-  /* progress bar */
-  .mat-progress { margin-bottom: 9px; }
-  .progress-bar-track { height: 5px; border-radius: 3px; background: rgba(255,255,255,0.07); overflow: hidden; }
-  .progress-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s cubic-bezier(.4,0,.2,1); }
-  .progress-labels { display: flex; justify-content: space-between; margin-top: 4px; font-size: 11px; font-weight: 700; }
-  .prog-have { color: var(--accent-green); }
-  .prog-need { color: var(--accent-red); }
-  .prog-pct { color: var(--text-muted); }
-  .bar-green { background: linear-gradient(90deg, #22c55e, #4ade80); }
-  .bar-yellow { background: linear-gradient(90deg, #d97706, #fbbf24); }
-  .bar-red { background: linear-gradient(90deg, #dc2626, #f87171); }
+/* upload */
+.upzone {
+  border: 2px dashed rgba(91,158,249,0.28);
+  border-radius: var(--r);
+  padding: 16px 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  background: rgba(91,158,249,0.04);
+}
+.upzone:hover, .upzone.over {
+  border-color: var(--sapph);
+  background: rgba(91,158,249,0.1);
+}
+.upzone-ico { font-size: 22px; margin-bottom: 5px; }
+.upzone-txt { font-size: 11px; color: var(--t2); line-height: 1.5; }
+.upzone-txt b { color: var(--sapph); }
 
-  /* storage */
-  .storage-row { display: flex; gap: 5px; margin-bottom: 9px; flex-wrap: wrap; }
-  .storage-chip { display: flex; align-items: center; gap: 4px; background: rgba(20,30,55,0.65); border: 1px solid var(--glass-border); border-radius: 7px; padding: 4px 8px; font-size: 11px; font-weight: 700; flex: 1; min-width: 0; justify-content: center; }
-  .storage-emoji { font-size: 12px; }
-  .storage-val { color: var(--text-primary); }
-  .storage-lbl { color: var(--text-muted); font-size: 10px; }
+/* ring */
+.ring-wrap { display: flex; flex-direction: column; align-items: center; gap: 9px; padding: 4px 0 6px; }
+.ring-svg-wrap { position: relative; width: 84px; height: 84px; }
+.ring-bg { fill: none; stroke: var(--ink5); stroke-width: 6; }
+.ring-fg {
+  fill: none; stroke: var(--lime); stroke-width: 6;
+  stroke-linecap: round;
+  stroke-dasharray: 238;
+  stroke-dashoffset: 238;
+  transform: rotate(-90deg); transform-origin: center;
+  transition: stroke-dashoffset .8s cubic-bezier(.4,0,.2,1);
+  filter: drop-shadow(0 0 5px rgba(92,221,139,.5));
+}
+.ring-inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.ring-pct { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: var(--lime); line-height: 1; }
+.ring-lbl { font-size: 9px; color: var(--t3); font-weight: 700; margin-top: 1px; }
+.ring-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; width: 100%; }
+.rstat { background: var(--ink4); border: 1px solid var(--line); border-radius: var(--rs); padding: 7px 6px; text-align: center; }
+.rstat-v { font-family: 'JetBrains Mono', monospace; font-size: 15px; font-weight: 700; line-height: 1; }
+.rstat-l { font-size: 9px; color: var(--t3); margin-top: 2px; font-weight: 600; }
 
-  /* controls */
-  .mat-controls { display: flex; align-items: center; gap: 5px; }
-  .qty-input { flex: 1; min-width: 0; background: rgba(20,30,55,0.7); border: 1px solid var(--glass-border); border-radius: 7px; padding: 6px 8px; color: var(--text-primary); font-family: 'VT323', monospace; font-size: 16px; text-align: center; outline: none; transition: border-color 0.2s; }
-  .qty-input:focus { border-color: rgba(96,165,250,0.5); }
-  .inc-btn { padding: 6px 9px; border-radius: 7px; border: 1px solid var(--glass-border); background: rgba(30,50,90,0.5); color: var(--text-primary); font-family: 'VT323', monospace; font-size: 13px; cursor: pointer; transition: all 0.18s; white-space: nowrap; font-weight: 700; }
-  .inc-btn:hover { background: rgba(74,222,128,0.15); border-color: rgba(74,222,128,0.4); color: var(--accent-green); transform: translateY(-1px); }
-  .inc-btn:active { transform: translateY(0); }
-  .set-btn { padding: 6px 10px; border-radius: 7px; border: 1px solid rgba(96,165,250,0.35); background: rgba(96,165,250,0.12); color: var(--accent-blue); font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 800; cursor: pointer; transition: all 0.18s; }
-  .set-btn:hover { background: rgba(96,165,250,0.25); }
+/* cats */
+.clist { display: flex; flex-direction: column; gap: 1px; }
+.crow {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 9px; border-radius: var(--rs);
+  cursor: pointer; transition: all .14s; border: 1px solid transparent;
+  font-size: 11px; font-weight: 600;
+}
+.crow:hover { background: var(--ink4); border-color: var(--line); }
+.crow.act { background: var(--ink5); border-color: var(--line2); }
+.crow-l { display: flex; align-items: center; gap: 7px; }
+.cdot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.cbadge { font-size: 9px; font-family: 'JetBrains Mono', monospace; font-weight: 700; background: var(--ink4); border: 1px solid var(--line); border-radius: 3px; padding: 1px 5px; color: var(--t3); }
 
-  /* empty state */
-  .empty-state { text-align: center; padding: 60px 20px; color: var(--text-muted); }
-  .empty-icon { font-size: 50px; margin-bottom: 14px; opacity: 0.5; }
-  .empty-title { font-family: 'Press Start 2P', monospace; font-size: 11px; color: var(--text-muted); margin-bottom: 8px; }
-  .empty-sub { font-size: 13px; line-height: 1.6; }
+/* storage summary */
+.stor-rows { display: flex; flex-direction: column; gap: 0; }
+.stor-r { display: flex; align-items: center; justify-content: space-between; padding: 5px 2px; border-bottom: 1px solid var(--line); }
+.stor-r:last-child { border: none; }
+.stor-lbl { font-size: 11px; color: var(--t2); }
+.stor-val { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; }
 
-  /* storage summary */
-  #storageSummary .stat-mini { padding: 7px 10px; }
+/* ═══ MAIN ════════════════════════════════════════════════════════════════════ */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
-  /* toast */
-  .toast-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 7px; z-index: 9999; }
-  .toast { background: rgba(8,14,26,0.95); border: 1px solid var(--glass-border); border-radius: 10px; padding: 10px 16px; font-size: 12px; font-weight: 700; backdrop-filter: blur(16px); display: flex; align-items: center; gap: 8px; animation: toastIn 0.3s cubic-bezier(.4,0,.2,1); min-width: 180px; }
-  @keyframes toastIn { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: none; } }
+/* stat strip */
+.strip {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  background: var(--ink2);
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+}
+.sc {
+  padding: 11px 16px;
+  border-right: 1px solid var(--line);
+  transition: background .15s;
+}
+.sc:last-child { border: none; }
+.sc:hover { background: var(--ink3); }
+.sc-v { font-family: 'JetBrains Mono', monospace; font-size: 20px; font-weight: 700; color: var(--t1); line-height: 1; }
+.sc-l { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--t3); margin-top: 3px; }
 
-  /* project name inline edit */
-  .proj-name-edit {
-    background: transparent; border: none; border-bottom: 1px solid var(--glass-border);
-    color: var(--accent-blue); font-family: 'Press Start 2P', monospace; font-size: 8px;
-    padding: 3px 5px; outline: none; width: 150px; transition: border-color 0.2s;
-  }
-  .proj-name-edit:focus { border-color: rgba(96,165,250,0.6); }
+/* toolbar */
+.bar {
+  display: flex; align-items: center; gap: 9px;
+  padding: 10px 16px;
+  background: var(--ink2);
+  border-bottom: 1px solid var(--line);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+.sbox { position: relative; flex: 1; min-width: 170px; }
+.sico { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--t3); font-size: 12px; pointer-events: none; }
+.sin {
+  width: 100%; background: var(--ink4);
+  border: 1px solid var(--line); border-radius: var(--rs);
+  padding: 7px 10px 7px 28px;
+  color: var(--t1); font-family: 'Barlow', sans-serif;
+  font-size: 12px; font-weight: 600;
+  outline: none; transition: border-color .2s;
+}
+.sin::placeholder { color: var(--t3); }
+.sin:focus { border-color: var(--line2); background: var(--ink5); }
+.ssel {
+  background: var(--ink4); border: 1px solid var(--line);
+  border-radius: var(--rs); padding: 7px 10px;
+  color: var(--t1); font-family: 'Barlow', sans-serif;
+  font-size: 11px; font-weight: 700; cursor: pointer; outline: none;
+}
+.chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 5px 11px; border-radius: 20px;
+  border: 1px solid var(--line); background: transparent;
+  font-size: 11px; font-weight: 700; cursor: pointer;
+  transition: all .14s; color: var(--t3);
+  font-family: 'Barlow', sans-serif;
+}
+.chip:hover { color: var(--t1); border-color: var(--line2); }
+.chip.on { color: var(--lime); border-color: rgba(92,221,139,.38); background: var(--lime-g); }
 
-  /* modal */
-  .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 500;
-    display: flex; align-items: center; justify-content: center;
-    backdrop-filter: blur(6px);
-    animation: fadeIn 0.2s ease;
-  }
-  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-  .modal {
-    background: rgba(12,18,35,0.98); border: 1px solid var(--glass-border);
-    border-radius: 16px; padding: 28px 32px; min-width: 340px; max-width: 480px;
-    box-shadow: 0 24px 60px rgba(0,0,0,0.6);
-    animation: slideUp 0.25s cubic-bezier(.4,0,.2,1);
-  }
-  @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
-  .modal-title { font-family: 'Press Start 2P', monospace; font-size: 11px; color: var(--accent-green); margin-bottom: 18px; }
-  .modal-input {
-    width: 100%; background: rgba(20,30,55,0.8); border: 1px solid var(--glass-border);
-    border-radius: 9px; padding: 10px 14px; color: var(--text-primary);
-    font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 700;
-    outline: none; margin-bottom: 16px; transition: border-color 0.2s;
-  }
-  .modal-input:focus { border-color: rgba(96,165,250,0.5); }
-  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+/* grid */
+.gscroll { flex: 1; overflow-y: auto; padding: 14px 16px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 10px; }
 
-  .hidden-input { display: none; }
-  ::-webkit-scrollbar { width: 5px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(60,90,150,0.4); border-radius: 3px; }
+/* ═══ MATERIAL CARD ══════════════════════════════════════════════════════════ */
+.card {
+  background: var(--ink2);
+  border: 1px solid var(--line);
+  border-radius: var(--r);
+  overflow: hidden;
+  transition: transform .18s, border-color .18s, box-shadow .18s;
+  position: relative;
+}
+.card:hover { transform: translateY(-2px); border-color: var(--line2); box-shadow: var(--sh2); }
+.card.done { border-color: rgba(92,221,139,.22); }
+
+/* accent line top */
+.card-accent { height: 3px; }
+
+/* card head */
+.card-head { display: flex; align-items: center; gap: 10px; padding: 12px 12px 9px; }
+.card-ico {
+  width: 42px; height: 42px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+  background: var(--ink4); border: 1px solid var(--line);
+}
+.card-meta { flex: 1; min-width: 0; }
+.card-name { font-size: 13px; font-weight: 700; color: var(--t1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-tags { display: flex; align-items: center; gap: 5px; margin-top: 4px; flex-wrap: wrap; }
+.ctag { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 3px; border: 1px solid; white-space: nowrap; }
+.t-stone   { background: rgba(110,110,110,.1); border-color: rgba(110,110,110,.3); color: #aaa; }
+.t-wood    { background: rgba(155,90,35,.1);   border-color: rgba(155,90,35,.3);   color: #c8905a; }
+.t-ore     { background: rgba(61,220,200,.08); border-color: rgba(61,220,200,.28); color: #3ddcc8; }
+.t-rare    { background: rgba(192,132,252,.08);border-color: rgba(192,132,252,.28);color: var(--ameth); }
+.t-plant   { background: rgba(92,221,139,.08); border-color: rgba(92,221,139,.28); color: var(--lime); }
+.t-redstone{ background: rgba(255,107,107,.08);border-color: rgba(255,107,107,.28);color: var(--ember); }
+.t-deco    { background: rgba(240,192,64,.08); border-color: rgba(240,192,64,.28); color: var(--gold); }
+.t-glass   { background: rgba(147,197,253,.08);border-color: rgba(147,197,253,.28);color: #93c5fd; }
+.pips { display: flex; gap: 2px; }
+.pip { width: 5px; height: 5px; border-radius: 2px; background: var(--ink5); }
+.pip.on { background: var(--gold); }
+
+.done-tag {
+  position: absolute; top: 10px; right: 10px;
+  background: var(--lime-g); border: 1px solid rgba(92,221,139,.35);
+  border-radius: 20px; padding: 2px 8px;
+  font-size: 9px; font-weight: 800; color: var(--lime);
+}
+
+/* progress */
+.card-prog { padding: 0 12px 9px; }
+.ptrack { height: 5px; border-radius: 3px; background: var(--ink5); overflow: hidden; }
+.pfill { height: 100%; border-radius: 3px; transition: width .6s cubic-bezier(.4,0,.2,1); }
+.p-r { background: linear-gradient(90deg, #991111, var(--ember)); }
+.p-y { background: linear-gradient(90deg, #a06000, var(--gold)); }
+.p-g { background: linear-gradient(90deg, #1a7a3a, var(--lime)); }
+.prow { display: flex; justify-content: space-between; margin-top: 4px; font-size: 10px; font-weight: 700; }
+
+/* stor chips */
+.card-stor { display: flex; gap: 5px; padding: 0 12px 9px; }
+.schip { flex: 1; background: var(--ink4); border: 1px solid var(--line); border-radius: var(--rs); padding: 6px 6px; text-align: center; }
+.schip-v { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: var(--t1); line-height: 1; }
+.schip-l { font-size: 8px; color: var(--t3); margin-top: 2px; font-weight: 600; text-transform: uppercase; letter-spacing: .3px; }
+
+/* controls */
+.card-ctrl {
+  display: flex; align-items: center; gap: 5px;
+  padding: 8px 12px 12px;
+  background: var(--ink3);
+  border-top: 1px solid var(--line);
+}
+.cbt {
+  padding: 6px 9px; border-radius: var(--rs);
+  border: 1px solid var(--line); background: var(--ink5);
+  color: var(--t2); font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; font-weight: 700; cursor: pointer;
+  transition: all .14s; white-space: nowrap;
+}
+.cbt:hover { background: var(--ink2); border-color: var(--line2); color: var(--t1); }
+.cbt-add:hover { color: var(--lime); border-color: rgba(92,221,139,.4); background: var(--lime-g); }
+.cbt-full { color: var(--lime); border-color: rgba(92,221,139,.3); background: var(--lime-g); }
+.cbt-full:hover { background: rgba(92,221,139,.2); }
+.cbt-clr { color: var(--ember); border-color: rgba(255,107,107,.3); background: var(--ember-g); }
+.cbt-clr:hover { background: rgba(255,107,107,.2); }
+.cnum {
+  flex: 1; min-width: 0;
+  background: var(--ink2); border: 1px solid var(--line);
+  border-radius: var(--rs); padding: 6px 8px;
+  color: var(--t1); font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; text-align: center; outline: none;
+  transition: border-color .2s;
+}
+.cnum:focus { border-color: rgba(91,158,249,.5); }
+
+/* empty */
+.empty { grid-column: 1/-1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 20px; text-align: center; }
+.empty-e { font-size: 46px; margin-bottom: 14px; opacity: .3; }
+.empty-t { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; color: var(--t2); margin-bottom: 6px; letter-spacing: .5px; }
+.empty-s { font-size: 13px; color: var(--t3); line-height: 1.6; max-width: 280px; }
+
+/* ═══ TOAST ══════════════════════════════════════════════════════════════════ */
+.tbox { position: fixed; bottom: 18px; right: 18px; display: flex; flex-direction: column; gap: 7px; z-index: 9999; pointer-events: none; }
+.toast {
+  display: flex; align-items: center; gap: 9px;
+  background: var(--ink2); border: 1px solid var(--line2);
+  border-radius: var(--r); padding: 10px 15px;
+  font-size: 12px; font-weight: 700;
+  box-shadow: var(--sh2);
+  animation: tIn .28s cubic-bezier(.4,0,.2,1);
+  min-width: 190px; pointer-events: auto;
+}
+@keyframes tIn { from { opacity:0; transform:translateX(12px); } to { opacity:1; transform:none; } }
+
+/* ═══ MODAL ══════════════════════════════════════════════════════════════════ */
+.mbg {
+  position: fixed; inset: 0; background: rgba(0,0,0,.75);
+  z-index: 300; display: flex; align-items: center; justify-content: center;
+  backdrop-filter: blur(6px);
+  animation: fadeIn .2s ease;
+}
+@keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+.modal {
+  background: var(--ink2); border: 1px solid var(--line2);
+  border-radius: 14px; padding: 26px;
+  min-width: 340px; max-width: 420px;
+  box-shadow: 0 40px 100px rgba(0,0,0,.8);
+  animation: mUp .22s cubic-bezier(.4,0,.2,1);
+}
+@keyframes mUp { from{opacity:0;transform:translateY(10px);} to{opacity:1;transform:none;} }
+.m-title { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 800; color: var(--t1); margin-bottom: 4px; }
+.m-sub { font-size: 11px; color: var(--t3); margin-bottom: 16px; }
+.m-in {
+  width: 100%; background: var(--ink4); border: 1px solid var(--line);
+  border-radius: var(--rs); padding: 9px 13px;
+  color: var(--t1); font-family: 'Barlow', sans-serif;
+  font-size: 13px; font-weight: 600;
+  outline: none; margin-bottom: 15px; transition: border-color .2s;
+}
+.m-in:focus { border-color: rgba(91,158,249,.5); }
+.m-acts { display: flex; gap: 7px; justify-content: flex-end; }
 </style>
 </head>
 <body>
-<div id="app">
 
-  <!-- HEADER -->
-  <header class="header">
-    <div class="logo">
-      <div class="logo-icon">⛏</div>
-      <div>
-        <div class="logo-text">SchematicForge</div>
-        <div class="logo-sub">Survival Build Manager v2</div>
+<!-- ── TOPBAR ── -->
+<div class="top">
+  <div class="logo">
+    <div class="logo-box">⛏</div>
+    <div>
+      <div class="logo-text">SchematicForge</div>
+      <div class="logo-sub">Survival Build Manager</div>
+    </div>
+  </div>
+
+  <div class="proj-tag" id="projTag" onclick="renameActive()">
+    <div class="proj-led" id="projLed"></div>
+    <div class="proj-tag-name" id="projTagName">No project</div>
+  </div>
+
+  <div class="flex1"></div>
+
+  <button class="tbtn tbtn-blue" onclick="document.getElementById('fin').click()">📂 Load .txt</button>
+  <button class="tbtn tbtn-lime" onclick="newProject()">＋ New</button>
+  <button class="tbtn" onclick="doExport()">📋 Export</button>
+  <button class="tbtn" onclick="doBackup()">💾 Backup</button>
+  <button class="tbtn" onclick="document.getElementById('rin').click()">📁 Restore</button>
+  <input type="file" id="fin" accept=".txt" onchange="onFile(event)">
+  <input type="file" id="rin" accept=".json" onchange="onRestore(event)">
+</div>
+
+<!-- ── BODY ── -->
+<div class="body">
+
+  <!-- LEFT RAIL -->
+  <div class="rail">
+
+    <!-- History header -->
+    <div class="rail-sec" style="padding-bottom:0;">
+      <div class="rail-label">
+        History
+        <button class="tbtn" style="padding:2px 7px;font-size:9px;" onclick="newProject()">＋</button>
       </div>
     </div>
-    <div style="display:flex;align-items:center;gap:8px;">
-      <span style="font-size:11px;color:var(--text-muted);font-weight:700;">Project:</span>
-      <input class="proj-name-edit" id="projectName" placeholder="My Build" value="Untitled Build"
-        onchange="renameCurrentProject(this.value)" onblur="renameCurrentProject(this.value)">
+
+    <!-- History list -->
+    <div class="hist" id="histEl"></div>
+
+    <!-- Upload -->
+    <div class="rail-sec">
+      <div class="upzone" id="dz"
+        ondragover="event.preventDefault();this.classList.add('over')"
+        ondragleave="this.classList.remove('over')"
+        ondrop="onDrop(event)"
+        onclick="document.getElementById('fin').click()">
+        <div class="upzone-ico">📦</div>
+        <div class="upzone-txt"><b>Drop Litematica .txt</b><br>or click to browse</div>
+      </div>
+      <button class="tbtn" style="width:100%;justify-content:center;margin-top:7px;color:var(--sapph);border-color:rgba(91,158,249,.3);background:var(--sapph-g);" onclick="loadDemo()">✨ Demo Build</button>
     </div>
-    <div class="header-actions">
-      <button class="btn btn-sm btn-blue" onclick="document.getElementById('fileInput').click()">📂 Load .txt</button>
-      <button class="btn btn-sm btn-green" onclick="newProject()">+ New Project</button>
-      <button class="btn btn-sm" onclick="exportChecklist()">📋 Export</button>
-      <button class="btn btn-sm" onclick="exportProjectFile()">💾 Backup</button>
-      <button class="btn btn-sm" onclick="document.getElementById('backupInput').click()">📁 Restore</button>
+
+    <!-- Progress -->
+    <div class="rail-sec">
+      <div class="rail-label">Build Progress</div>
+      <div class="ring-wrap">
+        <div class="ring-svg-wrap">
+          <svg width="84" height="84" viewBox="0 0 84 84">
+            <circle class="ring-bg" cx="42" cy="42" r="38"/>
+            <circle class="ring-fg" id="ringEl" cx="42" cy="42" r="38"/>
+          </svg>
+          <div class="ring-inner">
+            <div class="ring-pct" id="ringPct">0%</div>
+            <div class="ring-lbl">DONE</div>
+          </div>
+        </div>
+        <div class="ring-stats">
+          <div class="rstat"><div class="rstat-v" id="rDone" style="color:var(--lime)">0</div><div class="rstat-l">Done</div></div>
+          <div class="rstat"><div class="rstat-v" id="rLeft" style="color:var(--ember)">0</div><div class="rstat-l">Left</div></div>
+        </div>
+      </div>
     </div>
-    <input type="file" id="fileInput" class="hidden-input" accept=".txt" onchange="handleFileUpload(event)">
-    <input type="file" id="backupInput" class="hidden-input" accept=".json" onchange="handleBackupRestore(event)">
-  </header>
+
+    <!-- Categories -->
+    <div class="rail-sec" style="flex:1;overflow-y:auto;border-bottom:none;">
+      <div class="rail-label">Categories</div>
+      <div class="clist" id="catEl"></div>
+    </div>
+
+    <!-- Storage -->
+    <div class="rail-sec" style="flex-shrink:0;">
+      <div class="rail-label">Storage Needed</div>
+      <div class="stor-rows" id="storEl"><div class="hempty">Load a schematic first</div></div>
+    </div>
+
+  </div><!-- /rail -->
 
   <!-- MAIN -->
   <div class="main">
 
-    <!-- HISTORY PANEL -->
-    <div class="history-panel">
-      <div class="history-header">
-        <span class="history-title">📂 History</span>
-        <div class="history-actions">
-          <button class="btn btn-sm btn-icon" title="New Project" onclick="newProject()">+</button>
-        </div>
-      </div>
-      <div class="history-list" id="historyList"></div>
+    <!-- Stats strip -->
+    <div class="strip">
+      <div class="sc"><div class="sc-v" id="sT">0</div><div class="sc-l">Total Items</div></div>
+      <div class="sc"><div class="sc-v" id="sC" style="color:var(--lime)">0</div><div class="sc-l">Completed</div></div>
+      <div class="sc"><div class="sc-v" id="sP" style="color:var(--lime)">0%</div><div class="sc-l">Progress</div></div>
+      <div class="sc"><div class="sc-v" id="sSh" style="color:var(--ameth)">0</div><div class="sc-l">Shulkers Left</div></div>
+      <div class="sc"><div class="sc-v" id="sM" style="color:var(--ember)">0</div><div class="sc-l">Missing</div></div>
     </div>
 
-    <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <!-- Upload -->
-      <div class="glass-panel">
-        <div class="panel-header"><span class="panel-title">📄 Load File</span></div>
-        <div class="panel-body">
-          <div class="upload-zone" id="dropZone"
-            ondragover="event.preventDefault();this.classList.add('drag-over')"
-            ondragleave="this.classList.remove('drag-over')"
-            ondrop="handleDrop(event)"
-            onclick="document.getElementById('fileInput').click()">
-            <div class="upload-icon">📦</div>
-            <div class="upload-text">
-              <strong>Drop Litematica .txt</strong><br>
-              or click to browse
-            </div>
-          </div>
-          <div style="margin-top:10px;">
-            <button class="btn btn-sm btn-blue" style="width:100%;justify-content:center;" onclick="loadDemo()">✨ Demo Build</button>
-          </div>
+    <!-- Toolbar -->
+    <div class="bar">
+      <div class="sbox">
+        <span class="sico">🔍</span>
+        <input class="sin" id="si" placeholder="Search materials…" oninput="renderGrid()">
+      </div>
+      <select class="ssel" id="ss" onchange="renderGrid()">
+        <option value="name">Name A→Z</option>
+        <option value="td">Most Needed</option>
+        <option value="ta">Least Needed</option>
+        <option value="md">Most Missing</option>
+        <option value="pa">Least Complete</option>
+        <option value="pd">Most Complete</option>
+      </select>
+      <button class="chip on"    id="fc-all"        onclick="setF('all')">All</button>
+      <button class="chip"       id="fc-incomplete" onclick="setF('incomplete')">⚠ Incomplete</button>
+      <button class="chip"       id="fc-complete"   onclick="setF('complete')">✅ Done</button>
+      <button class="chip"       id="fc-rare"       onclick="setF('rare')">💎 Rare</button>
+    </div>
+
+    <!-- Grid -->
+    <div class="gscroll">
+      <div class="grid" id="grid">
+        <div class="empty">
+          <div class="empty-e">⛏</div>
+          <div class="empty-t">Welcome to SchematicForge</div>
+          <div class="empty-s">Load a Litematica .txt file or try the Demo Build to start tracking your schematic materials.</div>
         </div>
       </div>
+    </div>
 
-      <!-- Progress -->
-      <div class="glass-panel">
-        <div class="panel-header"><span class="panel-title">🏗 Progress</span></div>
-        <div class="panel-body">
-          <div class="progress-circle-wrap">
-            <div class="progress-ring-container">
-              <svg width="96" height="96" viewBox="0 0 96 96">
-                <circle class="progress-ring-bg" cx="48" cy="48" r="44"/>
-                <circle class="progress-ring-fill" id="progressRing" cx="48" cy="48" r="44"/>
-              </svg>
-              <div class="progress-ring-text">
-                <span class="progress-ring-pct" id="progressPct">0%</span>
-                <span class="progress-ring-label">DONE</span>
-              </div>
-            </div>
-            <div class="progress-stats">
-              <div class="stat-mini"><div class="stat-mini-val" id="statDone">0</div><div class="stat-mini-label">Done</div></div>
-              <div class="stat-mini"><div class="stat-mini-val" style="color:var(--accent-red)" id="statLeft">0</div><div class="stat-mini-label">To Go</div></div>
-            </div>
-          </div>
-        </div>
-      </div>
+  </div><!-- /main -->
+</div><!-- /body -->
 
-      <!-- Categories -->
-      <div class="glass-panel">
-        <div class="panel-header"><span class="panel-title">🗂 Categories</span></div>
-        <div class="panel-body" style="padding:8px 10px">
-          <div class="cat-list" id="categoryList"></div>
-        </div>
-      </div>
-
-      <!-- Storage -->
-      <div class="glass-panel">
-        <div class="panel-header"><span class="panel-title">📦 Storage</span></div>
-        <div class="panel-body" id="storageSummary">
-          <div style="text-align:center;padding:12px 0;color:var(--text-muted);font-size:12px;">Load a schematic first</div>
-        </div>
-      </div>
-    </aside>
-
-    <!-- CONTENT -->
-    <main class="content">
-      <!-- Analytics -->
-      <div class="analytics-bar">
-        <div class="anal-card"><div class="anal-val" id="analTotal">0</div><div class="anal-label">Total Items</div></div>
-        <div class="anal-card"><div class="anal-val" id="analComplete">0</div><div class="anal-label">Completed</div></div>
-        <div class="anal-card"><div class="anal-val" id="analProgress" style="color:var(--accent-green)">0%</div><div class="anal-label">Progress</div></div>
-        <div class="anal-card"><div class="anal-val" id="analShulkers" style="color:var(--accent-purple)">0</div><div class="anal-label">Shulkers Left</div></div>
-        <div class="anal-card"><div class="anal-val" id="analMissing" style="color:var(--accent-red)">0</div><div class="anal-label">Missing</div></div>
-      </div>
-
-      <!-- Controls -->
-      <div class="controls-bar">
-        <div class="search-wrap">
-          <span class="search-icon">🔍</span>
-          <input class="search-input" id="searchInput" placeholder="Search materials..." oninput="renderMaterials()">
-        </div>
-        <select class="sort-select" id="sortSelect" onchange="renderMaterials()">
-          <option value="name">Sort: Name</option>
-          <option value="total_desc">Most Needed</option>
-          <option value="total_asc">Least Needed</option>
-          <option value="missing_desc">Most Missing</option>
-          <option value="pct_asc">Least Complete</option>
-          <option value="pct_desc">Most Complete</option>
-        </select>
-        <div class="filter-chip active" id="chip-all" onclick="setFilter('all')">All</div>
-        <div class="filter-chip" id="chip-incomplete" onclick="setFilter('incomplete')">⚠ Incomplete</div>
-        <div class="filter-chip" id="chip-complete" onclick="setFilter('complete')">✅ Done</div>
-        <div class="filter-chip" id="chip-rare" onclick="setFilter('rare')">💎 Rare</div>
-      </div>
-
-      <!-- Grid -->
-      <div class="material-grid" id="materialGrid">
-        <div class="empty-state" style="grid-column:1/-1">
-          <div class="empty-icon">📦</div>
-          <div class="empty-title">No Project Selected</div>
-          <div class="empty-sub">Create a new project or load a Litematica .txt file</div>
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <div class="toast-container" id="toastContainer"></div>
-</div>
+<div class="tbox" id="tbox"></div>
 
 <script>
-// ══════════════════════════════════════════════════════
-//  STATE
-// ══════════════════════════════════════════════════════
-const STORAGE_KEY = 'schematicforge_v2';
-let state = {
-  projects: {},   // { id: { id, name, materials, created, updated } }
-  activeId: null
-};
-let activeCategory = 'all';
-let activeFilter = 'all';
+/* ═══════════════════════════════════════════════════
+   PROTECTION
+═══════════════════════════════════════════════════ */
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+  if (
+    e.key === 'F12' ||
+    (e.ctrlKey && e.shiftKey && 'IJC'.includes(e.key.toUpperCase())) ||
+    (e.ctrlKey && e.key.toUpperCase() === 'U')
+  ) { e.preventDefault(); return false; }
+});
+setInterval(() => {
+  if (window.outerWidth - window.innerWidth > 180 || window.outerHeight - window.innerHeight > 180) {
+    document.body.innerHTML = '<div style="height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#0b0d12;color:#ff6b6b;font-family:monospace;"><div style="font-size:52px">🔒</div><div style="font-size:16px;font-weight:800">Access Restricted</div><div style="font-size:12px;color:#424e6a">Developer tools are disabled on this site.</div></div>';
+  }
+}, 1500);
 
-// ── Getters ──────────────────────────────────────────
-function currentProject() { return state.activeId ? state.projects[state.activeId] : null; }
-function getMaterials() { return currentProject()?.materials || []; }
+/* ═══════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════ */
+const LS_KEY = 'sf_v3';
+let S = { projects: {}, activeId: null };
+let activeCat = 'all', activeFilter = 'all';
 
-// ══════════════════════════════════════════════════════
-//  PERSISTENCE
-// ══════════════════════════════════════════════════════
-function saveState() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+const proj = () => S.activeId ? S.projects[S.activeId] : null;
+const mats = () => proj()?.materials || [];
+
+function persist() {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch(e){}
+  refreshHist();
 }
-function loadState() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) { state = JSON.parse(raw); }
-  } catch(e) {}
-}
-function autoSave() {
-  const proj = currentProject();
-  if (proj) { proj.updated = new Date().toISOString(); }
-  saveState();
-  refreshHistoryList();
+function hydrate() {
+  try { const r = localStorage.getItem(LS_KEY); if (r) S = JSON.parse(r); } catch(e){}
 }
 
-// ══════════════════════════════════════════════════════
-//  PROJECT MANAGEMENT
-// ══════════════════════════════════════════════════════
-function genId() { return 'proj_' + Date.now() + '_' + Math.random().toString(36).slice(2,7); }
+/* ═══════════════════════════════════════════════════
+   PROJECTS
+═══════════════════════════════════════════════════ */
+const uid = () => 'p' + Date.now() + '_' + Math.random().toString(36).slice(2,5);
 
 function newProject(name, materials) {
-  const id = genId();
-  const now = new Date().toISOString();
-  state.projects[id] = {
-    id, name: name || 'New Build', materials: materials || [],
-    created: now, updated: now
-  };
-  switchProject(id);
-  if (!name) openRenameModal(id);
-  saveState();
-  return id;
+  const id = uid(), now = new Date().toISOString();
+  S.projects[id] = { id, name: name || 'New Build', materials: materials || [], created: now, updated: now };
+  switchTo(id);
+  if (!name) openRename(id);
+  persist();
 }
 
-function switchProject(id) {
-  if (!state.projects[id]) return;
-  state.activeId = id;
-  activeCategory = 'all';
-  activeFilter = 'all';
-  document.getElementById('projectName').value = state.projects[id].name;
-  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-  document.getElementById('chip-all').classList.add('active');
-  updateAll();
-  refreshHistoryList();
-  saveState();
+function switchTo(id) {
+  if (!S.projects[id]) return;
+  S.activeId = id;
+  activeCat = 'all'; activeFilter = 'all';
+  const p = S.projects[id];
+  document.getElementById('projTagName').textContent = p.name;
+  document.getElementById('projTag').classList.add('has');
+  document.getElementById('projLed').classList.add('on');
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+  document.getElementById('fc-all').classList.add('on');
+  updateAll(); persist();
 }
 
-function renameCurrentProject(name) {
-  if (!name.trim() || !currentProject()) return;
-  currentProject().name = name.trim();
-  autoSave();
-}
-
-function deleteProject(id, e) {
+function deleteProj(id, e) {
   e.stopPropagation();
-  if (!confirm(`Delete "${state.projects[id]?.name}"? This cannot be undone.`)) return;
-  delete state.projects[id];
-  if (state.activeId === id) {
-    const remaining = Object.keys(state.projects);
-    state.activeId = remaining.length ? remaining[remaining.length - 1] : null;
+  if (!confirm(`Delete "${S.projects[id]?.name}"?`)) return;
+  delete S.projects[id];
+  if (S.activeId === id) {
+    const ks = Object.keys(S.projects);
+    S.activeId = ks.length ? ks[ks.length-1] : null;
   }
-  saveState();
-  if (state.activeId) switchProject(state.activeId);
-  else { updateAll(); refreshHistoryList(); }
-  toast('🗑 Project deleted', '#f87171');
+  persist();
+  if (S.activeId) switchTo(S.activeId);
+  else { updateAll(); refreshHist(); }
+  toast('Project deleted', 'var(--ember)');
 }
 
-// ── Rename modal ──────────────────────────────────────
-function openRenameModal(id) {
-  const proj = state.projects[id];
-  if (!proj) return;
-  const overlay = document.createElement('div');
-  overlay.className = 'modal-overlay';
-  overlay.innerHTML = `
-    <div class="modal">
-      <div class="modal-title">✏ Name Your Project</div>
-      <input class="modal-input" id="modalNameInput" placeholder="e.g. Medieval Castle" value="${proj.name}" autofocus>
-      <div class="modal-actions">
-        <button class="btn btn-sm" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
-        <button class="btn btn-sm btn-green" onclick="confirmRename('${id}')">✓ Save</button>
+function renameActive() {
+  if (!S.activeId) return;
+  openRename(S.activeId);
+}
+
+function openRename(id) {
+  const p = S.projects[id]; if (!p) return;
+  const ov = document.createElement('div');
+  ov.className = 'mbg';
+  ov.innerHTML = `<div class="modal">
+    <div class="m-title">✏ Rename Project</div>
+    <div class="m-sub">Give your build a name you'll remember</div>
+    <input class="m-in" id="mIn" value="${esc(p.name)}" placeholder="e.g. Mega Castle">
+    <div class="m-acts">
+      <button class="tbtn" onclick="document.querySelector('.mbg').remove()">Cancel</button>
+      <button class="tbtn tbtn-lime" onclick="doRename('${id}')">✓ Save</button>
+    </div>
+  </div>`;
+  ov.onclick = e => { if (e.target === ov) ov.remove(); };
+  document.body.appendChild(ov);
+  setTimeout(() => { const i = document.getElementById('mIn'); i?.focus(); i?.select(); }, 40);
+  document.getElementById('mIn').onkeydown = e => { if (e.key === 'Enter') doRename(id); };
+}
+
+function doRename(id) {
+  const v = document.getElementById('mIn')?.value.trim();
+  if (v && S.projects[id]) {
+    S.projects[id].name = v;
+    if (S.activeId === id) document.getElementById('projTagName').textContent = v;
+    persist();
+  }
+  document.querySelector('.mbg')?.remove();
+}
+
+/* ═══════════════════════════════════════════════════
+   HISTORY
+═══════════════════════════════════════════════════ */
+function refreshHist() {
+  const el = document.getElementById('histEl');
+  const projs = Object.values(S.projects).sort((a,b) =>
+    (b.updated||b.created) > (a.updated||a.created) ? 1 : -1
+  );
+  if (!projs.length) { el.innerHTML = '<div class="hempty">No projects yet</div>'; return; }
+  el.innerHTML = projs.map(p => {
+    const m = p.materials || [];
+    const done = m.filter(x => x.have >= x.total).length;
+    const tot = m.length;
+    const pct = tot ? Math.round(done/tot*100) : 0;
+    const col = pct===100 ? 'var(--lime)' : pct>=50 ? 'var(--gold)' : 'var(--ember)';
+    const emo = pct===100 ? '🏆' : pct>=50 ? '🏗️' : '📋';
+    const dt = new Date(p.updated||p.created).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    return `<div class="hrow ${p.id===S.activeId?'act':''}" onclick="switchTo('${p.id}')">
+      <div class="hrow-emo">${emo}</div>
+      <div class="hrow-data">
+        <div class="hrow-name">${esc(p.name)}</div>
+        <div class="hrow-meta">${tot} items · ${dt}</div>
       </div>
-    </div>`;
-  overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
-  document.body.appendChild(overlay);
-  setTimeout(() => document.getElementById('modalNameInput')?.focus(), 50);
-  document.getElementById('modalNameInput').onkeydown = (e) => { if (e.key === 'Enter') confirmRename(id); };
-}
-
-function confirmRename(id) {
-  const val = document.getElementById('modalNameInput')?.value.trim();
-  if (val && state.projects[id]) {
-    state.projects[id].name = val;
-    document.getElementById('projectName').value = val;
-    autoSave();
-  }
-  document.querySelector('.modal-overlay')?.remove();
-}
-
-// ══════════════════════════════════════════════════════
-//  HISTORY LIST
-// ══════════════════════════════════════════════════════
-function refreshHistoryList() {
-  const list = document.getElementById('historyList');
-  const projects = Object.values(state.projects)
-    .sort((a, b) => (b.updated || b.created) > (a.updated || a.created) ? 1 : -1);
-
-  if (!projects.length) {
-    list.innerHTML = `<div class="history-empty">No projects yet.<br>Load a .txt file or<br>click + to start.</div>`;
-    return;
-  }
-
-  list.innerHTML = projects.map(p => {
-    const mats = p.materials || [];
-    const done = mats.filter(m => m.have >= m.total).length;
-    const total = mats.length;
-    const pct = total ? Math.round(done / total * 100) : 0;
-    const pctColor = pct === 100 ? 'var(--accent-green)' : pct >= 50 ? 'var(--accent-yellow)' : 'var(--accent-red)';
-    const isActive = p.id === state.activeId;
-    const date = new Date(p.updated || p.created).toLocaleDateString('en-US', { month:'short', day:'numeric' });
-    const emoji = pct === 100 ? '🏆' : pct >= 50 ? '🏗' : '📋';
-
-    return `<div class="hist-item ${isActive ? 'active' : ''}" onclick="switchProject('${p.id}')">
-      <div class="hist-item-icon">${emoji}</div>
-      <div class="hist-item-info">
-        <div class="hist-item-name">${escHtml(p.name)}</div>
-        <div class="hist-item-meta">${total} items · ${date}</div>
-      </div>
-      <div class="hist-item-pct" style="color:${pctColor}">${pct}%</div>
-      <div class="hist-del" onclick="deleteProject('${p.id}', event)">✕</div>
+      <div class="hrow-pct" style="color:${col}">${pct}%</div>
+      <div class="hrow-del" onclick="deleteProj('${p.id}',event)">✕</div>
     </div>`;
   }).join('');
 }
 
-function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-// ══════════════════════════════════════════════════════
-//  ITEM DATA
-// ══════════════════════════════════════════════════════
-const ITEM_DATA = {
-  'diamond':{'emoji':'💎','cat':'ore','badge':'badge-ore','diff':5},
-  'emerald':{'emoji':'💚','cat':'ore','badge':'badge-ore','diff':5},
-  'netherite':{'emoji':'🔥','cat':'rare','badge':'badge-rare','diff':5},
-  'ancient debris':{'emoji':'🔥','cat':'rare','badge':'badge-rare','diff':5},
-  'obsidian':{'emoji':'⬛','cat':'rare','badge':'badge-rare','diff':4},
-  'crying obsidian':{'emoji':'💜','cat':'rare','badge':'badge-rare','diff':4},
-  'nether':{'emoji':'🔥','cat':'rare','badge':'badge-rare','diff':4},
-  'end':{'emoji':'🌌','cat':'rare','badge':'badge-rare','diff':4},
-  'shulker':{'emoji':'🟪','cat':'rare','badge':'badge-rare','diff':4},
-  'elytra':{'emoji':'🦅','cat':'rare','badge':'badge-rare','diff':5},
-  'prismarine':{'emoji':'🌊','cat':'rare','badge':'badge-rare','diff':3},
-  'sea lantern':{'emoji':'🌊','cat':'rare','badge':'badge-rare','diff':3},
-  'sea':{'emoji':'🌊','cat':'rare','badge':'badge-rare','diff':3},
-  'sponge':{'emoji':'🟡','cat':'rare','badge':'badge-rare','diff':4},
-  'shroomlight':{'emoji':'🍄','cat':'rare','badge':'badge-rare','diff':3},
-  'soul':{'emoji':'👻','cat':'rare','badge':'badge-rare','diff':3},
-  'gold':{'emoji':'🌟','cat':'ore','badge':'badge-ore','diff':3},
-  'iron':{'emoji':'⚙️','cat':'ore','badge':'badge-ore','diff':2},
-  'copper':{'emoji':'🟠','cat':'ore','badge':'badge-ore','diff':2},
-  'lapis':{'emoji':'🔵','cat':'ore','badge':'badge-ore','diff':3},
-  'quartz':{'emoji':'🤍','cat':'ore','badge':'badge-ore','diff':3},
-  'amethyst':{'emoji':'🟣','cat':'ore','badge':'badge-ore','diff':3},
-  'redstone':{'emoji':'🔴','cat':'redstone','badge':'badge-redstone','diff':2},
-  'piston':{'emoji':'🔩','cat':'redstone','badge':'badge-redstone','diff':2},
-  'observer':{'emoji':'👁','cat':'redstone','badge':'badge-redstone','diff':2},
-  'comparator':{'emoji':'🔁','cat':'redstone','badge':'badge-redstone','diff':3},
-  'repeater':{'emoji':'🔁','cat':'redstone','badge':'badge-redstone','diff':2},
-  'hopper':{'emoji':'🔽','cat':'redstone','badge':'badge-redstone','diff':2},
-  'dispenser':{'emoji':'📤','cat':'redstone','badge':'badge-redstone','diff':2},
-  'dropper':{'emoji':'📤','cat':'redstone','badge':'badge-redstone','diff':2},
-  'lever':{'emoji':'🕹','cat':'redstone','badge':'badge-redstone','diff':1},
-  'glass':{'emoji':'🔷','cat':'glass','badge':'badge-glass','diff':1},
-  'stained glass':{'emoji':'🟦','cat':'glass','badge':'badge-glass','diff':2},
-  'oak':{'emoji':'🪵','cat':'wood','badge':'badge-wood','diff':1},
-  'birch':{'emoji':'🪵','cat':'wood','badge':'badge-wood','diff':1},
-  'spruce':{'emoji':'🪵','cat':'wood','badge':'badge-wood','diff':1},
-  'jungle':{'emoji':'🪵','cat':'wood','badge':'badge-wood','diff':1},
-  'acacia':{'emoji':'🪵','cat':'wood','badge':'badge-wood','diff':2},
-  'dark oak':{'emoji':'🪵','cat':'wood','badge':'badge-wood','diff':2},
-  'mangrove':{'emoji':'🪵','cat':'wood','badge':'badge-wood','diff':2},
-  'cherry':{'emoji':'🌸','cat':'wood','badge':'badge-wood','diff':2},
-  'wood':{'emoji':'🪵','cat':'wood','badge':'badge-wood','diff':1},
-  'log':{'emoji':'🪵','cat':'wood','badge':'badge-wood','diff':1},
-  'plank':{'emoji':'🪵','cat':'wood','badge':'badge-wood','diff':1},
-  'planks':{'emoji':'🪵','cat':'wood','badge':'badge-wood','diff':1},
-  'stick':{'emoji':'🥢','cat':'wood','badge':'badge-wood','diff':1},
-  'fence':{'emoji':'🪵','cat':'wood','badge':'badge-wood','diff':1},
-  'moss':{'emoji':'🌱','cat':'plant','badge':'badge-plant','diff':2},
-  'vine':{'emoji':'🌿','cat':'plant','badge':'badge-plant','diff':2},
-  'leaves':{'emoji':'🍃','cat':'plant','badge':'badge-plant','diff':1},
-  'flower':{'emoji':'🌸','cat':'plant','badge':'badge-plant','diff':1},
-  'grass':{'emoji':'🌿','cat':'plant','badge':'badge-plant','diff':1},
-  'dirt':{'emoji':'🟫','cat':'plant','badge':'badge-plant','diff':1},
-  'mud':{'emoji':'🟫','cat':'plant','badge':'badge-plant','diff':1},
-  'sand':{'emoji':'🏖','cat':'plant','badge':'badge-plant','diff':1},
-  'clay':{'emoji':'🟤','cat':'plant','badge':'badge-plant','diff':2},
-  'deepslate':{'emoji':'🪨','cat':'stone','badge':'badge-stone','diff':2},
-  'blackstone':{'emoji':'⬛','cat':'stone','badge':'badge-stone','diff':2},
-  'basalt':{'emoji':'🖤','cat':'stone','badge':'badge-stone','diff':2},
-  'stone':{'emoji':'🪨','cat':'stone','badge':'badge-stone','diff':1},
-  'cobblestone':{'emoji':'🪨','cat':'stone','badge':'badge-stone','diff':1},
-  'andesite':{'emoji':'🪨','cat':'stone','badge':'badge-stone','diff':1},
-  'granite':{'emoji':'🪨','cat':'stone','badge':'badge-stone','diff':1},
-  'diorite':{'emoji':'🪨','cat':'stone','badge':'badge-stone','diff':1},
-  'gravel':{'emoji':'⚫','cat':'stone','badge':'badge-stone','diff':1},
-  'tuff':{'emoji':'🪨','cat':'stone','badge':'badge-stone','diff':1},
-  'calcite':{'emoji':'🤍','cat':'stone','badge':'badge-stone','diff':2},
-  'polished':{'emoji':'🪨','cat':'stone','badge':'badge-stone','diff':1},
-  'cobbled':{'emoji':'🪨','cat':'stone','badge':'badge-stone','diff':1},
-  'smooth stone':{'emoji':'🪨','cat':'stone','badge':'badge-stone','diff':1},
-  'stone brick':{'emoji':'🧱','cat':'stone','badge':'badge-stone','diff':1},
-  'stone bricks':{'emoji':'🧱','cat':'stone','badge':'badge-stone','diff':1},
-  'slab':{'emoji':'🧱','cat':'stone','badge':'badge-stone','diff':1},
-  'stair':{'emoji':'🧱','cat':'stone','badge':'badge-stone','diff':1},
-  'stairs':{'emoji':'🧱','cat':'stone','badge':'badge-stone','diff':1},
-  'wall':{'emoji':'🧱','cat':'stone','badge':'badge-stone','diff':1},
-  'brick':{'emoji':'🧱','cat':'deco','badge':'badge-deco','diff':2},
-  'bricks':{'emoji':'🧱','cat':'deco','badge':'badge-deco','diff':2},
-  'wool':{'emoji':'🐑','cat':'deco','badge':'badge-deco','diff':2},
-  'concrete':{'emoji':'🟦','cat':'deco','badge':'badge-deco','diff':1},
-  'terracotta':{'emoji':'🟫','cat':'deco','badge':'badge-deco','diff':1},
-  'carpet':{'emoji':'🟦','cat':'deco','badge':'badge-deco','diff':2},
-  'banner':{'emoji':'🚩','cat':'deco','badge':'badge-deco','diff':2},
-  'lantern':{'emoji':'🏮','cat':'deco','badge':'badge-deco','diff':2},
-  'torch':{'emoji':'🔦','cat':'deco','badge':'badge-deco','diff':1},
-  'candle':{'emoji':'🕯','cat':'deco','badge':'badge-deco','diff':2},
-  'chain':{'emoji':'⛓','cat':'deco','badge':'badge-deco','diff':2},
-  'iron bar':{'emoji':'🔩','cat':'deco','badge':'badge-deco','diff':2},
-  'iron bars':{'emoji':'🔩','cat':'deco','badge':'badge-deco','diff':2},
-  'door':{'emoji':'🚪','cat':'deco','badge':'badge-deco','diff':1},
-  'trapdoor':{'emoji':'🚪','cat':'deco','badge':'badge-deco','diff':1},
-  'barrel':{'emoji':'🛢','cat':'deco','badge':'badge-deco','diff':1},
-  'chest':{'emoji':'📦','cat':'deco','badge':'badge-deco','diff':1},
-  'bookshelf':{'emoji':'📚','cat':'deco','badge':'badge-deco','diff':2},
-  'glowstone':{'emoji':'💡','cat':'deco','badge':'badge-deco','diff':3},
+/* ═══════════════════════════════════════════════════
+   ITEM METADATA
+═══════════════════════════════════════════════════ */
+const IMAP = {
+  'diamond':{e:'💎',c:'ore',t:'t-ore',d:5},'emerald':{e:'💚',c:'ore',t:'t-ore',d:5},
+  'netherite':{e:'🔥',c:'rare',t:'t-rare',d:5},'ancient debris':{e:'🔥',c:'rare',t:'t-rare',d:5},
+  'obsidian':{e:'⬛',c:'rare',t:'t-rare',d:4},'crying obsidian':{e:'💜',c:'rare',t:'t-rare',d:4},
+  'nether':{e:'🔥',c:'rare',t:'t-rare',d:4},'end':{e:'🌌',c:'rare',t:'t-rare',d:4},
+  'shulker':{e:'🟪',c:'rare',t:'t-rare',d:4},'elytra':{e:'🦅',c:'rare',t:'t-rare',d:5},
+  'prismarine':{e:'🌊',c:'rare',t:'t-rare',d:3},'sea lantern':{e:'🌊',c:'rare',t:'t-rare',d:3},
+  'sea':{e:'🌊',c:'rare',t:'t-rare',d:3},'sponge':{e:'🟡',c:'rare',t:'t-rare',d:4},
+  'shroomlight':{e:'🍄',c:'rare',t:'t-rare',d:3},'soul':{e:'👻',c:'rare',t:'t-rare',d:3},
+  'gold':{e:'🌟',c:'ore',t:'t-ore',d:3},'iron':{e:'⚙️',c:'ore',t:'t-ore',d:2},
+  'copper':{e:'🟠',c:'ore',t:'t-ore',d:2},'lapis':{e:'🔵',c:'ore',t:'t-ore',d:3},
+  'quartz':{e:'🤍',c:'ore',t:'t-ore',d:3},'amethyst':{e:'🟣',c:'ore',t:'t-ore',d:3},
+  'redstone':{e:'🔴',c:'redstone',t:'t-redstone',d:2},'piston':{e:'🔩',c:'redstone',t:'t-redstone',d:2},
+  'observer':{e:'👁',c:'redstone',t:'t-redstone',d:2},'comparator':{e:'🔁',c:'redstone',t:'t-redstone',d:3},
+  'repeater':{e:'🔁',c:'redstone',t:'t-redstone',d:2},'hopper':{e:'🔽',c:'redstone',t:'t-redstone',d:2},
+  'dispenser':{e:'📤',c:'redstone',t:'t-redstone',d:2},'dropper':{e:'📤',c:'redstone',t:'t-redstone',d:2},
+  'glass':{e:'🔷',c:'glass',t:'t-glass',d:1},'stained glass':{e:'🟦',c:'glass',t:'t-glass',d:2},
+  'oak':{e:'🪵',c:'wood',t:'t-wood',d:1},'birch':{e:'🪵',c:'wood',t:'t-wood',d:1},
+  'spruce':{e:'🪵',c:'wood',t:'t-wood',d:1},'jungle':{e:'🪵',c:'wood',t:'t-wood',d:1},
+  'acacia':{e:'🪵',c:'wood',t:'t-wood',d:2},'dark oak':{e:'🪵',c:'wood',t:'t-wood',d:2},
+  'mangrove':{e:'🪵',c:'wood',t:'t-wood',d:2},'cherry':{e:'🌸',c:'wood',t:'t-wood',d:2},
+  'wood':{e:'🪵',c:'wood',t:'t-wood',d:1},'log':{e:'🪵',c:'wood',t:'t-wood',d:1},
+  'plank':{e:'🪵',c:'wood',t:'t-wood',d:1},'planks':{e:'🪵',c:'wood',t:'t-wood',d:1},
+  'stick':{e:'🥢',c:'wood',t:'t-wood',d:1},'fence':{e:'🪵',c:'wood',t:'t-wood',d:1},
+  'moss':{e:'🌱',c:'plant',t:'t-plant',d:2},'vine':{e:'🌿',c:'plant',t:'t-plant',d:2},
+  'leaves':{e:'🍃',c:'plant',t:'t-plant',d:1},'flower':{e:'🌸',c:'plant',t:'t-plant',d:1},
+  'grass':{e:'🌿',c:'plant',t:'t-plant',d:1},'dirt':{e:'🟫',c:'plant',t:'t-plant',d:1},
+  'mud':{e:'🟫',c:'plant',t:'t-plant',d:1},'sand':{e:'🏖',c:'plant',t:'t-plant',d:1},
+  'clay':{e:'🟤',c:'plant',t:'t-plant',d:2},
+  'deepslate':{e:'🪨',c:'stone',t:'t-stone',d:2},'blackstone':{e:'⬛',c:'stone',t:'t-stone',d:2},
+  'basalt':{e:'🖤',c:'stone',t:'t-stone',d:2},'stone':{e:'🪨',c:'stone',t:'t-stone',d:1},
+  'cobblestone':{e:'🪨',c:'stone',t:'t-stone',d:1},'andesite':{e:'🪨',c:'stone',t:'t-stone',d:1},
+  'granite':{e:'🪨',c:'stone',t:'t-stone',d:1},'diorite':{e:'🪨',c:'stone',t:'t-stone',d:1},
+  'gravel':{e:'⚫',c:'stone',t:'t-stone',d:1},'tuff':{e:'🪨',c:'stone',t:'t-stone',d:1},
+  'calcite':{e:'🤍',c:'stone',t:'t-stone',d:2},'polished':{e:'🪨',c:'stone',t:'t-stone',d:1},
+  'cobbled':{e:'🪨',c:'stone',t:'t-stone',d:1},'smooth stone':{e:'🪨',c:'stone',t:'t-stone',d:1},
+  'stone brick':{e:'🧱',c:'stone',t:'t-stone',d:1},'stone bricks':{e:'🧱',c:'stone',t:'t-stone',d:1},
+  'slab':{e:'🧱',c:'stone',t:'t-stone',d:1},'stair':{e:'🧱',c:'stone',t:'t-stone',d:1},
+  'stairs':{e:'🧱',c:'stone',t:'t-stone',d:1},'wall':{e:'🧱',c:'stone',t:'t-stone',d:1},
+  'brick':{e:'🧱',c:'deco',t:'t-deco',d:2},'bricks':{e:'🧱',c:'deco',t:'t-deco',d:2},
+  'wool':{e:'🐑',c:'deco',t:'t-deco',d:2},'concrete':{e:'🟦',c:'deco',t:'t-deco',d:1},
+  'terracotta':{e:'🟫',c:'deco',t:'t-deco',d:1},'carpet':{e:'🟦',c:'deco',t:'t-deco',d:2},
+  'banner':{e:'🚩',c:'deco',t:'t-deco',d:2},'lantern':{e:'🏮',c:'deco',t:'t-deco',d:2},
+  'torch':{e:'🔦',c:'deco',t:'t-deco',d:1},'candle':{e:'🕯',c:'deco',t:'t-deco',d:2},
+  'chain':{e:'⛓',c:'deco',t:'t-deco',d:2},'iron bar':{e:'🔩',c:'deco',t:'t-deco',d:2},
+  'iron bars':{e:'🔩',c:'deco',t:'t-deco',d:2},'door':{e:'🚪',c:'deco',t:'t-deco',d:1},
+  'trapdoor':{e:'🚪',c:'deco',t:'t-deco',d:1},'barrel':{e:'🛢',c:'deco',t:'t-deco',d:1},
+  'chest':{e:'📦',c:'deco',t:'t-deco',d:1},'bookshelf':{e:'📚',c:'deco',t:'t-deco',d:2},
+  'glowstone':{e:'💡',c:'deco',t:'t-deco',d:3},
 };
 
-const CATEGORIES = {
-  'all':{'label':'All Items','color':'#60a5fa','dot':'#60a5fa'},
-  'stone':{'label':'Stone & Rock','color':'#9ca3af','dot':'#6b7280'},
-  'wood':{'label':'Wood','color':'#a16207','dot':'#854d0e'},
-  'glass':{'label':'Glass','color':'#93c5fd','dot':'#60a5fa'},
-  'ore':{'label':'Ores','color':'#4ae2d0','dot':'#14b8a6'},
-  'redstone':{'label':'Redstone','color':'#f87171','dot':'#dc2626'},
-  'plant':{'label':'Plants','color':'#4ade80','dot':'#16a34a'},
-  'rare':{'label':'Rare','color':'#a78bfa','dot':'#7c3aed'},
-  'deco':{'label':'Decorative','color':'#fbbf24','dot':'#d97706'},
+const CATS = {
+  all:      { l:'All Items',   col:'var(--sapph)', dot:'var(--sapph)' },
+  stone:    { l:'Stone & Rock',col:'#9ca3af',      dot:'#6b7280' },
+  wood:     { l:'Wood',        col:'#c8905a',      dot:'#a16207' },
+  glass:    { l:'Glass',       col:'#93c5fd',      dot:'#60a5fa' },
+  ore:      { l:'Ores',        col:'#3ddcc8',      dot:'#14b8a6' },
+  redstone: { l:'Redstone',    col:'var(--ember)', dot:'#dc2626' },
+  plant:    { l:'Plants',      col:'var(--lime)',  dot:'#16a34a' },
+  rare:     { l:'Rare',        col:'var(--ameth)', dot:'#7c3aed' },
+  deco:     { l:'Decorative',  col:'var(--gold)',  dot:'#d97706' },
 };
 
-function getItemData(name) {
-  const lower = name.toLowerCase();
-  for (const [key, data] of Object.entries(ITEM_DATA)) {
-    if (lower.includes(key)) return data;
-  }
-  return {emoji:'📦',cat:'deco',badge:'badge-deco',diff:1};
-}
+const idata = name => {
+  const l = name.toLowerCase();
+  for (const [k,v] of Object.entries(IMAP)) if (l.includes(k)) return v;
+  return { e:'📦', c:'deco', t:'t-deco', d:1 };
+};
 
-// ══════════════════════════════════════════════════════
-//  FILE PARSING
-// ══════════════════════════════════════════════════════
-function parseLitematicaTxt(text) {
-  const items = []; const seen = new Set();
+/* ═══════════════════════════════════════════════════
+   FILE PARSING
+═══════════════════════════════════════════════════ */
+function parseTxt(text) {
+  const items = [], seen = new Set();
   for (const line of text.split('\n')) {
     const t = line.trim(); if (!t) continue;
-    let match = null;
-    let m;
-    if ((m = t.match(/^(.+?)\s*[x:]\s*([\d,]+)\s*$/i))) match = [m[1], m[2]];
-    else if ((m = t.match(/^([\d,]+)\s+(.+)$/))) match = [m[2], m[1]];
-    else if ((m = t.match(/\|\s*(.+?)\s*\|\s*([\d,]+)\s*\|/))) match = [m[1], m[2]];
-    else { const parts = t.split('\t'); if (parts.length >= 2) { const n = parts[parts.length-1].replace(/,/g,''); if (/^\d+$/.test(n)) match = [parts.slice(0,-1).join(' '), n]; } }
-    if (match) {
-      const name = match[0].trim().replace(/minecraft:/i,'').replace(/_/g,' ').trim();
-      const qty = parseInt(match[1].replace(/,/g,''), 10);
-      if (name && qty > 0 && !seen.has(name.toLowerCase())) { seen.add(name.toLowerCase()); items.push({name, total:qty, have:0}); }
+    let nm = null, qty = null, m;
+    if ((m = t.match(/^(.+?)\s*[x:]\s*([\d,]+)\s*$/i))) { nm=m[1]; qty=m[2]; }
+    else if ((m = t.match(/^([\d,]+)\s+(.+)$/))) { nm=m[2]; qty=m[1]; }
+    else if ((m = t.match(/\|\s*(.+?)\s*\|\s*([\d,]+)\s*\|/))) { nm=m[1]; qty=m[2]; }
+    else {
+      const p = t.split('\t');
+      if (p.length>=2) { const n=p[p.length-1].replace(/,/g,''); if(/^\d+$/.test(n)){nm=p.slice(0,-1).join(' ');qty=n;} }
+    }
+    if (nm && qty) {
+      const name = nm.trim().replace(/minecraft:/i,'').replace(/_/g,' ').trim();
+      const q = parseInt(qty.replace(/,/g,''), 10);
+      if (name && q>0 && !seen.has(name.toLowerCase())) {
+        seen.add(name.toLowerCase());
+        items.push({ name, total: q, have: 0 });
+      }
     }
   }
   return items;
 }
 
-function handleFileUpload(event) {
-  const file = event.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const parsed = parseLitematicaTxt(e.target.result);
-    if (!parsed.length) { toast('⚠ Could not parse file', '#f87171'); return; }
-    const name = file.name.replace(/\.txt$/i,'');
-    newProject(name, parsed);
-    toast(`✅ Loaded ${parsed.length} materials!`, '#4ade80');
+function onFile(e) {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    const p = parseTxt(ev.target.result);
+    if (!p.length) { toast('Could not parse file', 'var(--ember)'); return; }
+    newProject(f.name.replace(/\.txt$/i,''), p);
+    toast(`✅ Loaded ${p.length} materials`, 'var(--lime)');
   };
-  reader.readAsText(file);
-  event.target.value = '';
+  r.readAsText(f); e.target.value = '';
 }
 
-function handleDrop(event) {
-  event.preventDefault();
-  document.getElementById('dropZone').classList.remove('drag-over');
-  const file = event.dataTransfer.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const parsed = parseLitematicaTxt(e.target.result);
-    if (!parsed.length) { toast('⚠ Could not parse file', '#f87171'); return; }
-    newProject(file.name.replace(/\.txt$/i,''), parsed);
-    toast(`✅ Loaded ${parsed.length} materials!`, '#4ade80');
+function onDrop(e) {
+  e.preventDefault(); document.getElementById('dz').classList.remove('over');
+  const f = e.dataTransfer.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    const p = parseTxt(ev.target.result);
+    if (!p.length) { toast('Could not parse file', 'var(--ember)'); return; }
+    newProject(f.name.replace(/\.txt$/i,''), p);
+    toast(`✅ Loaded ${p.length} materials`, 'var(--lime)');
   };
-  reader.readAsText(file);
+  r.readAsText(f);
 }
 
-// ══════════════════════════════════════════════════════
-//  DEMO
-// ══════════════════════════════════════════════════════
 function loadDemo() {
-  const mats = [
+  newProject('Medieval Castle Demo', [
     {name:'Stone Bricks',total:15360,have:8192},{name:'Oak Planks',total:4096,have:4096},
     {name:'Dark Oak Log',total:2048,have:512},{name:'Glass Pane',total:1728,have:864},
     {name:'Diamond Block',total:64,have:12},{name:'Netherite Block',total:16,have:2},
@@ -862,266 +896,245 @@ function loadDemo() {
     {name:'Prismarine Bricks',total:1024,have:384},{name:'Sea Lantern',total:256,have:128},
     {name:'Moss Block',total:512,have:256},{name:'Deepslate Tiles',total:2048,have:0},
     {name:'Polished Blackstone',total:1024,have:512},{name:'Glowstone',total:320,have:160},
-  ];
-  newProject('Medieval Castle Demo', mats);
-  toast('🏰 Demo loaded!', '#60a5fa');
+  ]);
+  toast('🏰 Demo build loaded', 'var(--sapph)');
 }
 
-// ══════════════════════════════════════════════════════
-//  CALCULATIONS
-// ══════════════════════════════════════════════════════
-function calcStorage(qty) {
-  qty = Math.max(0, qty);
-  return { stacks: Math.ceil(qty/64), shulkers: Math.ceil(Math.ceil(qty/64)/27), chests: Math.ceil(Math.ceil(qty/64)/54) };
-}
+/* ═══════════════════════════════════════════════════
+   CALCULATIONS
+═══════════════════════════════════════════════════ */
+const stor = n => {
+  n = Math.max(0, n);
+  const s = Math.ceil(n/64);
+  return { stacks: s, shulkers: Math.ceil(s/27), chests: Math.ceil(s/54) };
+};
 
-// ══════════════════════════════════════════════════════
-//  UPDATE ALL
-// ══════════════════════════════════════════════════════
+/* ═══════════════════════════════════════════════════
+   RENDER ALL
+═══════════════════════════════════════════════════ */
+function autoSave() { if (proj()) proj().updated = new Date().toISOString(); persist(); updateAll(); }
+
 function updateAll() {
-  renderCategories(); renderMaterials(); renderAnalytics(); renderProgress(); renderStorageSummary();
+  renderStrip(); renderRing(); renderCats(); renderStor(); renderGrid();
 }
 
-function renderAnalytics() {
-  const mats = getMaterials();
-  const total = mats.length;
-  const complete = mats.filter(m => m.have >= m.total).length;
-  const totalMissing = mats.reduce((s, m) => s + Math.max(0, m.total - m.have), 0);
-  const pct = total > 0 ? Math.round(complete/total*100) : 0;
-  const shulkers = mats.reduce((s, m) => s + calcStorage(Math.max(0, m.total - m.have)).shulkers, 0);
-  document.getElementById('analTotal').textContent = total;
-  document.getElementById('analComplete').textContent = complete;
-  document.getElementById('analProgress').textContent = pct + '%';
-  document.getElementById('analShulkers').textContent = shulkers;
-  document.getElementById('analMissing').textContent = totalMissing.toLocaleString();
+function renderStrip() {
+  const m = mats(), tot = m.length, done = m.filter(x=>x.have>=x.total).length;
+  const miss = m.reduce((s,x)=>s+Math.max(0,x.total-x.have),0);
+  const sh = m.reduce((s,x)=>s+stor(Math.max(0,x.total-x.have)).shulkers,0);
+  document.getElementById('sT').textContent = tot;
+  document.getElementById('sC').textContent = done;
+  document.getElementById('sP').textContent = (tot ? Math.round(done/tot*100) : 0) + '%';
+  document.getElementById('sSh').textContent = sh.toLocaleString();
+  document.getElementById('sM').textContent = miss.toLocaleString();
 }
 
-function renderProgress() {
-  const mats = getMaterials();
-  const total = mats.length;
-  const complete = mats.filter(m => m.have >= m.total).length;
-  const pct = total > 0 ? complete/total : 0;
-  const circumference = 276;
-  document.getElementById('progressRing').style.strokeDashoffset = circumference - (pct * circumference);
-  document.getElementById('progressPct').textContent = Math.round(pct * 100) + '%';
-  document.getElementById('statDone').textContent = complete;
-  document.getElementById('statLeft').textContent = total - complete;
+function renderRing() {
+  const m = mats(), tot = m.length, done = m.filter(x=>x.have>=x.total).length;
+  const pct = tot ? done/tot : 0;
+  document.getElementById('ringEl').style.strokeDashoffset = 238 - pct*238;
+  document.getElementById('ringPct').textContent = Math.round(pct*100) + '%';
+  document.getElementById('rDone').textContent = done;
+  document.getElementById('rLeft').textContent = tot - done;
 }
 
-function renderCategories() {
-  const mats = getMaterials();
-  const counts = {all: mats.length};
-  for (const m of mats) { const cat = getItemData(m.name).cat; counts[cat] = (counts[cat]||0)+1; }
-  const list = document.getElementById('categoryList');
-  list.innerHTML = '';
-  for (const [key, info] of Object.entries(CATEGORIES)) {
-    if (key !== 'all' && !counts[key]) continue;
-    const item = document.createElement('div');
-    item.className = 'cat-item' + (activeCategory === key ? ' active' : '');
-    item.innerHTML = `<div class="cat-item-left"><div class="cat-dot" style="background:${info.dot}"></div><span>${info.label}</span></div><span class="cat-count">${counts[key]||0}</span>`;
-    item.onclick = () => { activeCategory = key; renderCategories(); renderMaterials(); };
-    list.appendChild(item);
-  }
+function renderCats() {
+  const m = mats(), cnts = { all: m.length };
+  for (const x of m) { const c=idata(x.name).c; cnts[c]=(cnts[c]||0)+1; }
+  document.getElementById('catEl').innerHTML = Object.entries(CATS)
+    .filter(([k]) => k==='all' || cnts[k])
+    .map(([k,v]) => `<div class="crow ${activeCat===k?'act':''}" style="color:${v.col}" onclick="setCat('${k}')">
+      <div class="crow-l"><div class="cdot" style="background:${v.dot}"></div><span>${v.l}</span></div>
+      <div class="cbadge">${cnts[k]||0}</div>
+    </div>`).join('');
 }
 
-function renderStorageSummary() {
-  const el = document.getElementById('storageSummary');
-  const mats = getMaterials();
-  if (!mats.length) { el.innerHTML = '<div style="text-align:center;padding:10px 0;color:var(--text-muted);font-size:11px;">Load a schematic first</div>'; return; }
-  const totalMissing = mats.reduce((s,m) => s+Math.max(0,m.total-m.have), 0);
-  const {stacks,shulkers,chests} = calcStorage(totalMissing);
-  el.innerHTML = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
-    <div class="stat-mini"><div class="stat-mini-val" style="color:var(--accent-yellow)">${stacks.toLocaleString()}</div><div class="stat-mini-label">📦 Stacks</div></div>
-    <div class="stat-mini"><div class="stat-mini-val" style="color:var(--accent-purple)">${shulkers.toLocaleString()}</div><div class="stat-mini-label">🟪 Shulkers</div></div>
-    <div class="stat-mini" style="grid-column:1/-1"><div class="stat-mini-val" style="color:var(--accent-blue)">${chests.toLocaleString()}</div><div class="stat-mini-label">📦 Chests</div></div>
-  </div><div style="margin-top:8px;font-size:10px;color:var(--text-muted);text-align:center">for remaining materials</div>`;
+function renderStor() {
+  const el = document.getElementById('storEl'), m = mats();
+  if (!m.length) { el.innerHTML='<div class="hempty">Load a schematic first</div>'; return; }
+  const miss = m.reduce((s,x)=>s+Math.max(0,x.total-x.have),0);
+  const { stacks, shulkers, chests } = stor(miss);
+  el.innerHTML = [
+    ['📦 Stacks',       stacks.toLocaleString(),   'var(--gold)'],
+    ['🟪 Shulker Boxes',shulkers.toLocaleString(), 'var(--ameth)'],
+    ['📦 Double Chests',chests.toLocaleString(),   'var(--sapph)'],
+  ].map(([l,v,c]) => `<div class="stor-r"><span class="stor-lbl">${l}</span><span class="stor-val" style="color:${c}">${v}</span></div>`).join('');
 }
 
-function setFilter(f) {
+function setCat(c) { activeCat=c; renderCats(); renderGrid(); }
+
+function setF(f) {
   activeFilter = f;
-  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-  document.getElementById('chip-'+f)?.classList.add('active');
-  renderMaterials();
+  document.querySelectorAll('.chip').forEach(x => x.classList.remove('on'));
+  document.getElementById('fc-'+f)?.classList.add('on');
+  renderGrid();
 }
 
-function renderMaterials() {
-  const grid = document.getElementById('materialGrid');
-  const mats = getMaterials();
-  const search = document.getElementById('searchInput').value.toLowerCase();
-  const sort = document.getElementById('sortSelect').value;
+/* ═══════════════════════════════════════════════════
+   GRID
+═══════════════════════════════════════════════════ */
+function renderGrid() {
+  const g = document.getElementById('grid');
+  const m = mats();
+  const search = document.getElementById('si').value.toLowerCase();
+  const sort = document.getElementById('ss').value;
 
-  if (!currentProject()) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">📦</div><div class="empty-title">No Project</div><div class="empty-sub">Create a new project or load a .txt file</div></div>`;
+  if (!proj()) {
+    g.innerHTML = '<div class="empty"><div class="empty-e">⛏</div><div class="empty-t">No Project Selected</div><div class="empty-s">Load a .txt file or click Demo to start.</div></div>';
     return;
   }
 
-  let filtered = [...mats];
-  if (activeCategory !== 'all') filtered = filtered.filter(m => getItemData(m.name).cat === activeCategory);
-  if (activeFilter === 'incomplete') filtered = filtered.filter(m => m.have < m.total);
-  if (activeFilter === 'complete') filtered = filtered.filter(m => m.have >= m.total);
-  if (activeFilter === 'rare') filtered = filtered.filter(m => getItemData(m.name).diff >= 4);
-  if (search) filtered = filtered.filter(m => m.name.toLowerCase().includes(search));
+  let fl = [...m];
+  if (activeCat !== 'all') fl = fl.filter(x => idata(x.name).c === activeCat);
+  if (activeFilter==='incomplete') fl = fl.filter(x => x.have < x.total);
+  if (activeFilter==='complete')   fl = fl.filter(x => x.have >= x.total);
+  if (activeFilter==='rare')       fl = fl.filter(x => idata(x.name).d >= 4);
+  if (search) fl = fl.filter(x => x.name.toLowerCase().includes(search));
 
-  filtered.sort((a,b) => {
-    const ap = a.have/a.total, bp = b.have/b.total;
+  fl.sort((a,b) => {
     if (sort==='name') return a.name.localeCompare(b.name);
-    if (sort==='total_desc') return b.total-a.total;
-    if (sort==='total_asc') return a.total-b.total;
-    if (sort==='missing_desc') return (b.total-b.have)-(a.total-a.have);
-    if (sort==='pct_asc') return ap-bp;
-    if (sort==='pct_desc') return bp-ap;
+    if (sort==='td') return b.total - a.total;
+    if (sort==='ta') return a.total - b.total;
+    if (sort==='md') return (b.total-b.have) - (a.total-a.have);
+    if (sort==='pa') return (a.have/a.total) - (b.have/b.total);
+    if (sort==='pd') return (b.have/b.total) - (a.have/a.total);
     return 0;
   });
 
-  if (!filtered.length) {
-    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🔍</div><div class="empty-title">${mats.length===0?'No Materials':'No Matches'}</div><div class="empty-sub">${mats.length===0?'Load a Litematica .txt file or try Demo Build':'Try a different search or filter.'}</div></div>`;
+  if (!fl.length) {
+    g.innerHTML = `<div class="empty"><div class="empty-e">🔍</div><div class="empty-t">${m.length?'No Matches':'No Materials'}</div><div class="empty-s">${m.length?'Try a different filter or search term.':'Load a Litematica .txt file to begin.'}</div></div>`;
     return;
   }
-  grid.innerHTML = filtered.map(m => renderCard(m, mats.indexOf(m))).join('');
+
+  g.innerHTML = fl.map(x => buildCard(x, m.indexOf(x))).join('');
 }
 
-function renderCard(m, idx) {
-  const idata = getItemData(m.name);
-  const pct = Math.min(100, Math.round(m.have/m.total*100));
-  const missing = Math.max(0, m.total - m.have);
-  const storage = calcStorage(missing);
-  const complete = m.have >= m.total;
-  const barClass = pct>=100?'bar-green':pct>=50?'bar-yellow':'bar-red';
-  const diffColors = ['#6b7280','#22c55e','#eab308','#f97316','#ef4444','#8b5cf6'];
-  const diffColor = diffColors[Math.min(idata.diff,5)];
-  const diffDots = Array.from({length:5},(_,i)=>`<div class="diff-dot ${i<idata.diff?'filled':''}" style="--dot-color:${diffColor}"></div>`).join('');
-  return `<div class="mat-card ${complete?'complete':''} ${idata.diff>=4?'rare':''}" data-idx="${idx}">
-    ${complete?'<div class="complete-badge">✓ COMPLETE</div>':''}
-    <div class="mat-top">
-      <div class="mat-icon">${idata.emoji}</div>
-      <div class="mat-info">
-        <div class="mat-name">${escHtml(m.name)}</div>
-        <div class="mat-meta">
-          <span class="mat-badge ${idata.badge}">${CATEGORIES[idata.cat]?.label||idata.cat}</span>
-          <div class="difficulty-dots">${diffDots}</div>
+function buildCard(m, idx) {
+  const id = idata(m.name);
+  const pct = Math.min(100, Math.round(m.have / m.total * 100));
+  const miss = Math.max(0, m.total - m.have);
+  const s = stor(miss), st = stor(m.total);
+  const done = m.have >= m.total;
+  const barCl = pct>=100?'p-g':pct>=50?'p-y':'p-r';
+  const diffCols = ['#424e6a','var(--lime)','var(--gold)','var(--coral)','var(--ember)','var(--ameth)'];
+  const dc = diffCols[Math.min(id.d,5)];
+  const pips = Array.from({length:5},(_,i)=>`<div class="pip${i<id.d?' on':''}" ${i<id.d?`style="background:${dc}"`:''}></div>`).join('');
+  const accent = done ? 'var(--lime)' : id.d>=4 ? 'var(--ameth)' : 'transparent';
+  const catLabel = CATS[id.c]?.l || id.c;
+
+  return `<div class="card${done?' done':''}">
+    <div class="card-accent" style="background:${accent};opacity:.6;"></div>
+    ${done ? '<div class="done-tag">✓ Complete</div>' : ''}
+    <div class="card-head">
+      <div class="card-ico">${id.e}</div>
+      <div class="card-meta">
+        <div class="card-name">${esc(m.name)}</div>
+        <div class="card-tags">
+          <span class="ctag ${id.t}">${catLabel}</span>
+          <div class="pips" title="Difficulty ${id.d}/5">${pips}</div>
         </div>
       </div>
     </div>
-    <div class="mat-progress">
-      <div class="progress-bar-track"><div class="progress-bar-fill ${barClass}" style="width:${pct}%"></div></div>
-      <div class="progress-labels">
-        <span class="prog-have">Have: ${m.have.toLocaleString()}</span>
-        <span class="prog-pct">${pct}%</span>
-        <span class="prog-need">Need: ${missing.toLocaleString()}</span>
+    <div class="card-prog">
+      <div class="ptrack"><div class="pfill ${barCl}" style="width:${pct}%"></div></div>
+      <div class="prow">
+        <span style="color:var(--lime)">Have: ${m.have.toLocaleString()}</span>
+        <span style="color:var(--t3)">${pct}%</span>
+        <span style="color:var(--ember)">Need: ${miss.toLocaleString()}</span>
       </div>
     </div>
-    <div class="storage-row">
-      <div class="storage-chip"><span class="storage-emoji">📦</span><span class="storage-val">${calcStorage(m.total).stacks}</span><span class="storage-lbl">stacks</span></div>
-      <div class="storage-chip"><span class="storage-emoji">🟪</span><span class="storage-val">${storage.shulkers}</span><span class="storage-lbl">shulkers left</span></div>
-      <div class="storage-chip"><span class="storage-emoji">📊</span><span class="storage-val">${m.total.toLocaleString()}</span><span class="storage-lbl">total</span></div>
+    <div class="card-stor">
+      <div class="schip"><div class="schip-v" style="color:var(--gold)">${st.stacks}</div><div class="schip-l">stacks</div></div>
+      <div class="schip"><div class="schip-v" style="color:var(--ameth)">${s.shulkers}</div><div class="schip-l">shulkers left</div></div>
+      <div class="schip"><div class="schip-v">${m.total.toLocaleString()}</div><div class="schip-l">total needed</div></div>
     </div>
-    <div class="mat-controls">
-      <button class="inc-btn" onclick="addAmount(${idx},64)">+64</button>
-      <button class="inc-btn" onclick="addAmount(${idx},1728)">+🟪</button>
-      <input class="qty-input" type="number" min="0" value="${m.have}" onchange="setAmount(${idx},this.value)" oninput="setAmount(${idx},this.value)">
-      <button class="set-btn" onclick="setFull(${idx})">✓ Full</button>
-      <button class="inc-btn" style="color:var(--accent-red);border-color:rgba(248,113,113,0.3)" onclick="clearAmount(${idx})">✕</button>
+    <div class="card-ctrl">
+      <button class="cbt cbt-add" onclick="add(${idx},64)">+64</button>
+      <button class="cbt cbt-add" onclick="add(${idx},1728)" title="+1 Shulker Box">+🟪</button>
+      <input class="cnum" type="number" min="0" value="${m.have}" onchange="setAmt(${idx},this.value)" oninput="setAmt(${idx},this.value)">
+      <button class="cbt cbt-full" onclick="full(${idx})">✓ Full</button>
+      <button class="cbt cbt-clr" onclick="clr(${idx})">✕</button>
     </div>
   </div>`;
 }
 
-// ══════════════════════════════════════════════════════
-//  AMOUNT CONTROLS
-// ══════════════════════════════════════════════════════
-function addAmount(idx, n) {
-  const mats = getMaterials();
-  mats[idx].have = Math.min(mats[idx].total, mats[idx].have + n);
-  autoSave(); updateAll();
-}
-function setAmount(idx, val) {
-  const mats = getMaterials();
-  mats[idx].have = Math.min(mats[idx].total, Math.max(0, parseInt(val)||0));
-  autoSave(); updateAll();
-}
-function setFull(idx) {
-  const mats = getMaterials();
-  mats[idx].have = mats[idx].total;
-  autoSave(); updateAll();
-  toast('✅ ' + mats[idx].name + ' complete!', '#4ade80');
-}
-function clearAmount(idx) {
-  const mats = getMaterials();
-  mats[idx].have = 0;
-  autoSave(); updateAll();
+function add(i,n)   { mats()[i].have = Math.min(mats()[i].total, mats()[i].have+n); autoSave(); }
+function setAmt(i,v){ mats()[i].have = Math.min(mats()[i].total, Math.max(0,parseInt(v)||0)); autoSave(); }
+function full(i)    { mats()[i].have = mats()[i].total; autoSave(); toast(mats()[i].name+' complete! ✅','var(--lime)'); }
+function clr(i)     { mats()[i].have = 0; autoSave(); }
+
+/* ═══════════════════════════════════════════════════
+   EXPORT / BACKUP
+═══════════════════════════════════════════════════ */
+function doExport() {
+  const m = mats(); if (!m.length) { toast('No materials to export','var(--ember)'); return; }
+  const name = proj()?.name || 'Build';
+  const done = m.filter(x=>x.have>=x.total), todo = m.filter(x=>x.have<x.total);
+  let t = `SchematicForge — ${name}\n${'─'.repeat(50)}\nProgress: ${done.length}/${m.length}\n\nTODO:\n`;
+  for (const x of todo) {
+    const ms=x.total-x.have, {stacks,shulkers}=stor(ms);
+    t += `[ ] ${x.name.padEnd(30)} Need: ${ms.toString().padStart(7)}  (${stacks} stacks / ${shulkers} shulkers)\n`;
+  }
+  if (done.length) { t+=`\nCOMPLETE:\n`; for (const x of done) t+=`[✓] ${x.name}\n`; }
+  dl(t, name+'-checklist.txt', 'text/plain');
+  toast('📋 Checklist exported', 'var(--sapph)');
 }
 
-// ══════════════════════════════════════════════════════
-//  EXPORT / BACKUP
-// ══════════════════════════════════════════════════════
-function exportChecklist() {
-  const mats = getMaterials();
-  if (!mats.length) { toast('⚠ No materials to export', '#f87171'); return; }
-  const name = currentProject()?.name || 'Build';
-  const done = mats.filter(m => m.have >= m.total);
-  const todo = mats.filter(m => m.have < m.total);
-  let txt = `SchematicForge Export — ${name}\n${'='.repeat(50)}\nProgress: ${done.length}/${mats.length}\n\nTODO:\n`;
-  for (const m of todo) { const miss=m.total-m.have; const {stacks,shulkers}=calcStorage(miss); txt+=`[ ] ${m.name.padEnd(30)} Need: ${miss.toString().padStart(6)}  (${stacks} stacks / ${shulkers} shulkers)\n`; }
-  if (done.length) { txt+=`\nCOMPLETE:\n`; for (const m of done) txt+=`[✓] ${m.name}\n`; }
-  download(txt, (name+'-checklist.txt'), 'text/plain');
-  toast('📋 Checklist exported!', '#4ade80');
+function doBackup() {
+  dl(JSON.stringify(S,null,2), 'sf-backup.json', 'application/json');
+  toast('💾 Backup saved', 'var(--sapph)');
 }
 
-function exportProjectFile() {
-  const data = JSON.stringify(state, null, 2);
-  download(data, 'schematicforge-backup.json', 'application/json');
-  toast('💾 Backup saved!', '#60a5fa');
-}
-
-function handleBackupRestore(event) {
-  const file = event.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
+function onRestore(e) {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
     try {
-      const loaded = JSON.parse(e.target.result);
-      if (!loaded.projects) throw new Error('Invalid backup');
-      // Merge: keep existing, add new
-      for (const [id, proj] of Object.entries(loaded.projects)) { if (!state.projects[id]) state.projects[id] = proj; }
-      if (!state.activeId && loaded.activeId) state.activeId = loaded.activeId;
-      saveState();
-      if (state.activeId) switchProject(state.activeId);
-      else refreshHistoryList();
-      toast(`📁 Restored ${Object.keys(loaded.projects).length} projects!`, '#4ade80');
-    } catch { toast('⚠ Invalid backup file', '#f87171'); }
+      const d = JSON.parse(ev.target.result);
+      if (!d.projects) throw 0;
+      for (const [id,p] of Object.entries(d.projects)) if (!S.projects[id]) S.projects[id]=p;
+      if (!S.activeId && d.activeId) S.activeId = d.activeId;
+      persist();
+      if (S.activeId) switchTo(S.activeId); else refreshHist();
+      toast(`📁 Restored ${Object.keys(d.projects).length} projects`, 'var(--lime)');
+    } catch { toast('Invalid backup file', 'var(--ember)'); }
   };
-  reader.readAsText(file);
-  event.target.value = '';
+  r.readAsText(f); e.target.value='';
 }
 
-function download(content, filename, type) {
-  const blob = new Blob([content], {type});
+function dl(c, n, t) {
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  a.click();
+  a.href = URL.createObjectURL(new Blob([c],{type:t}));
+  a.download = n; a.click();
 }
 
-// ══════════════════════════════════════════════════════
-//  TOAST
-// ══════════════════════════════════════════════════════
-function toast(msg, color='#60a5fa') {
+/* ═══════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════ */
+function toast(msg, color='var(--sapph)') {
   const el = document.createElement('div');
   el.className = 'toast';
-  el.style.borderColor = color+'55';
-  el.style.color = color;
+  el.style.borderColor = color; el.style.color = color;
   el.textContent = msg;
-  document.getElementById('toastContainer').appendChild(el);
+  document.getElementById('tbox').appendChild(el);
   setTimeout(() => el.remove(), 3000);
 }
 
-// ══════════════════════════════════════════════════════
-//  INIT
-// ══════════════════════════════════════════════════════
-loadState();
-if (state.activeId && state.projects[state.activeId]) {
-  document.getElementById('projectName').value = state.projects[state.activeId].name;
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+/* ═══════════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════════ */
+hydrate();
+if (S.activeId && S.projects[S.activeId]) {
+  const p = S.projects[S.activeId];
+  document.getElementById('projTagName').textContent = p.name;
+  document.getElementById('projTag').classList.add('has');
+  document.getElementById('projLed').classList.add('on');
+  updateAll();
+} else {
+  refreshHist(); renderCats(); renderStor(); renderGrid();
 }
-refreshHistoryList();
-updateAll();
 </script>
 </body>
 </html>
